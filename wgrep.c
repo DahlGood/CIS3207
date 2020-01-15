@@ -11,42 +11,52 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
 
-        FILE* file = fopen(argv[i], "r");
-        if(file == NULL) {
-            printf("wgrep: cannot open file\n");
-            exit(1);
+        if(argv[2] == NULL) {
+            char content[60];
+            fgets(content, 60, stdin);
         }
+        else {
 
-        //Getting size of file.
-        fseek(file, 0, SEEK_END);
-        int size = ftell(file);
-        rewind(file);
-
-        //Allocating memory for the content in the file.
-        char* content = (char *)malloc(size);
-        if(content == NULL) {
-            printf("MALLOC failed\n");
-            exit(1);
-        }
-        
-        printf("%s is %d MB\n", argv[i], size);
-
-        //+1 accounting for the end of file marker.
-        //PROBLEM. Program crashes if the file being read contains an identifer. Ex: if the file contains %s.
-        while(fgets(content, size+1, file) != NULL) {
-            //char* found = (char *)malloc(strlen(argv[2]));
-            if(strstr(content, argv[1])) {
-                printf("%s", content);
+            FILE* file = fopen(argv[i], "r");
+            if(file == NULL) {
+                printf("wgrep: cannot open file\n");
+                exit(1);
             }
 
+            //Getting size of file.
+            fseek(file, 0, SEEK_END);
+            int size = ftell(file);
+            rewind(file);
+
+            //Allocating memory for the content in the file.
+            char* content = (char *)malloc(size);
+            if(content == NULL) {
+                printf("MALLOC failed\n");
+                exit(1);
+            }
+            
+            printf("%s is %d MB\n", argv[i], size);
+
+            //+1 accounting for the end of file marker.
+            //PROBLEM. Program crashes if the file being read contains an identifer. Ex: if the file contains %s.
+            while(fgets(content, size+1, file) != NULL) {
+                //char* found = (char *)malloc(strlen(argv[2]));
+                if(strstr(content, argv[1])) {
+                    printf("%s", content);
+                }
+
+            }
+            //fgets(content, size+1, file);
+            
+            fclose(file);
+
+            free(content);
+
+            printf("\n");
+
         }
-        //fgets(content, size+1, file);
+
         
-        fclose(file);
-
-        free(content);
-
-        printf("\n");
     
     }
 
