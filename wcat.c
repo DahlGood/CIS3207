@@ -3,36 +3,39 @@
 
 int main(int argc, char *argv[]) {
 
-    FILE* file = fopen(argv[1], "r");
-    if(file == NULL) {
-        printf("Problem openeing file with the name: %s\n", argv[1]);
-        exit(1);
-    }
+    for(int i = 1; i < argc; i++) {
+        FILE* file = fopen(argv[i], "r");
+        if(file == NULL) {
+            printf("wcat: cannot open file\n");
+            exit(1);
+        }
 
-    //Getting size of file.
-    fseek(file, 0, SEEK_END);
-    int size = ftell(file);
-    rewind(file);
+        //Getting size of file.
+        fseek(file, 0, SEEK_END);
+        int size = ftell(file);
+        rewind(file);
 
-    //Allocating memory for the content in the file.
-    char* content = (char *)malloc(size);
-    if(content == NULL) {
-        printf("MALLOC failed");
-        exit(1);
+        //Allocating memory for the content in the file.
+        char* content = (char *)malloc(size);
+        if(content == NULL) {
+            printf("MALLOC failed\n");
+            exit(1);
+        }
+    
+        printf("%s is %d MB\n", argv[i], size);
+
+        //+1 accounting for the end of file marker.
+        while(fgets(content, size+1, file) != NULL) {
+            printf("%s", content);
+        }
+    
+        fclose(file);
+
+        free(content);
+
+        printf("\n");
+
     }
     
-    printf("%s is %d MB\n", argv[1], size);
-
-    //+1 accounting for the end of file marker.
-    //PROBLEM. Program crashes if the file being read contains an identifer. Ex: if the file contains %s.
-    while(fgets(content, size+1, file) != NULL) {
-        printf(content);
-    }
-    //fgets(content, size+1, file);
-    
-    fclose(file);
-
-    free(content);
-
     return 0;
 }
