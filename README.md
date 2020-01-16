@@ -1,6 +1,6 @@
 # CIS3207 Labs
 
-# Lab 0
+## Lab0
 
 wcat
 wgrep
