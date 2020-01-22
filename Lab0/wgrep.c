@@ -38,15 +38,12 @@ int main(int argc, char *argv[]) {
             printf("%s is %d MB\n", argv[i], size);
 
             //+1 accounting for the end of file marker.
-            //PROBLEM. Program crashes if the file being read contains an identifer. Ex: if the file contains %s.
             while(fgets(content, size+1, file) != NULL) {
-                //char* found = (char *)malloc(strlen(argv[2]));
                 if(strstr(content, argv[1])) {
                     printf("%s", content);
                 }
 
             }
-            //fgets(content, size+1, file);
             
             fclose(file);
 
@@ -56,11 +53,7 @@ int main(int argc, char *argv[]) {
 
         }
 
-        
-    
     }
-
-    
 
     return 0;
 }

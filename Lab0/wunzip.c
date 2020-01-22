@@ -17,23 +17,11 @@ int main(int argc, char *argv[]) {
         rewind(file);
 
         //Allocating memory for the content in the file.
-        
         char* content = (char *)malloc(size);
         if(content == NULL) {
             printf("MALLOC failed\n");
             exit(1);
         }
-        /*
-        int char_count;
-        char current_char;
-        while(fgets(content, size+1, file)) {
-            fread(&char_count, sizeof(int), 1, file);
-            fread(&current_char, sizeof(char), 1, file);
-            for(int i = 0; i < char_count; i++) {
-                fwrite(&current_char, sizeof(char), 1, stdout);
-            }
-        }
-        */
         
         int running_char_length = 1;
         char current_char;
@@ -51,7 +39,7 @@ int main(int argc, char *argv[]) {
 
         fclose(file);
 
-        //free(content);
+        free(content);
 
         printf("\n");
 
