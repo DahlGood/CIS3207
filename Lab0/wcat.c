@@ -11,29 +11,40 @@ int main(int argc, char *argv[]) {
         }
 
         //Getting size of file.
+        /*
         fseek(file, 0, SEEK_END);
         int size = ftell(file);
         rewind(file);
+        */
 
         //Allocating memory for the content in the file.
-        char* content = (char *)malloc(size);
+        /*
+        printf("%d\n", size);
+        char* content = (char *)malloc(size+1);
         if(content == NULL) {
             printf("MALLOC failed\n");
             exit(1);
         }
-    
-        printf("%s is %d MB\n", argv[i], size);
+        */
 
         //+1 accounting for the end of file marker.
-        while(fgets(content, size+1, file) != NULL) {
-            printf("%s", content);
+        /*
+        while(fgets(content, size+1, file)) {
+            printf("%s\n", content);
         }
     
         fclose(file);
 
         free(content);
+        */
 
-        printf("\n");
+        char buffer[200];
+        
+        while(fgets(buffer, 200, file)) {
+            printf("%s", buffer);
+        }
+
+        fclose(file);
 
     }
     
