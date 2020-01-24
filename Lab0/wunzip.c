@@ -4,6 +4,11 @@
 
 int main(int argc, char *argv[]) {
 
+    if(argc < 2) {
+        printf("wunzip: file1 [file2 ...]\n");
+        exit(1);
+    }
+
     for(int i = 1; i < argc; i++) {
         FILE* file = fopen(argv[i], "rb");
         if(file == NULL) {
@@ -40,8 +45,6 @@ int main(int argc, char *argv[]) {
         fclose(file);
 
         free(content);
-
-        printf("\n");
 
     }
     
