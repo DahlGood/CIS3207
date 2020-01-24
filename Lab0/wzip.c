@@ -4,50 +4,69 @@
 
 int main(int argc, char *argv[]) {
 
-    for(int i = 1; i < argc; i++) {
-        FILE* file = fopen(argv[i], "rb");
-        if(file == NULL) {
-            printf("wzip: cannot open file\n");
-            exit(1);
-        }
+    if(argc < 2) {
+        printf("wzip: file1 [file2 ...]\n");
+        exit(1);
+    }
+    else {
+        int size = 0;
+        char* content = (char *)malloc(size + 1);
 
-        //Getting size of file.
-        fseek(file, 0, SEEK_END);
-        int size = ftell(file);
-        rewind(file);
+        for(int i = 1; i < argc; i++) {
+            FILE* file = fopen(argv[i], "rb");
+            if(file == NULL) {
+                printf("wzip: cannot open file\n");
+                exit(1);
+            }
 
-        //Allocating memory for the content in the file.
-        char* content = (char *)malloc(size);
-        if(content == NULL) {
-            printf("MALLOC failed\n");
-            exit(1);
-        }
+            int size_alt = size;
+            //Getting size of file.
+            fseek(file, 0, SEEK_END);
+            size += ftell(file);
+            rewind(file);
 
-        //+1 accounting for the end of file marker.
-        while(fgets(content, size+1, file) != NULL) {
-                fflush(stdout);
-                int running_char_length = 1;
-                for(int i = 1; i <= strlen(content); i++) {
-                    if(content[i] == content[i-1]) {
-                        running_char_length++;
-                    }
-                    else {
-                        fwrite(&running_char_length, sizeof(int), 1, stdout);
-                        fwrite(&content[i-1], sizeof(char), 1, stdout);
-                        running_char_length = 1;
-                    }
+            char* buffer = (char *)malloc(size - size_alt);
+            if(buffer == NULL) {
+                printf("MALLOC failed at malloc buffer\n");
+                exit(1);
+            }
 
-                }
+            //Allocating memory for the content in the file.
+            content = (char *)realloc(content, size);
+            if(content == NULL) {
+                printf("MALLOC failed\n");
+                exit(1);
+            }
 
+            //+1 accounting for the end of file marker.
+            while(fgets(buffer, size+1, file) != NULL) {
+                strcat(content, buffer);
             }        
 
-        fclose(file);
+            fclose(file);
+
+            free(buffer);
+
+        }
+
+        int running_char_length = 1;
+        for(int i = 1; i <= strlen(content); i++) {
+            if(content[i] == content[i-1]) {
+                running_char_length++;
+            }
+            else {
+                fwrite(&running_char_length, sizeof(int), 1, stdout);
+                fwrite(&content[i-1], sizeof(char), 1, stdout);
+                running_char_length = 1;
+            }
+
+        }
 
         free(content);
 
-        printf("\n");
-
     }
+
+    
     
     return 0;
 }
