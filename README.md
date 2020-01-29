@@ -6,3 +6,6 @@ wcat
 wgrep
 wzip
 wunzip
+
+## Lab1 - Discrete Event Simulation
+
