@@ -2,20 +2,16 @@
 #include <stdlib.h>
 #include <math.h>
 
-Random::Random() {
-    srand(time(NULL));
+int random_number;
+void setSEED(int seed) {
+    srand(seed);
     random_number = rand();
 }
 
-Random::Random(int SEED) {
-    srand(SEED);
-    random_number = rand();
-}
-
-double Random::getRandom() {
+double getRandom() {
     return random_number;
 }
 
-double Random::getRandomBounds(double min, double max) {
+double getRandomBounds(double min, double max) {
     return fmod(random_number, max-min) + min;
 }

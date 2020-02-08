@@ -8,8 +8,10 @@ Event newEvent(event_type type, int time, int PID) {
     return event;
 }
 
-Event newEvent(event_type type) {
+Event newEventB(event_type type) {
     event.eventType = type;
+    event.eventTime = event.eventTime;
+    event.eventProcess = event.eventProcess;
     return event;
 }
 
@@ -18,8 +20,7 @@ Event getEvent() {
 }
 
 int setEventTime(int time) {
-    Random random(getSEED());
-    return time + random.getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX());
+    return time + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX());
 }
 
 int setEventProcess() {

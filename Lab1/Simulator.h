@@ -2,10 +2,12 @@
 #define SIMULATOR_H
 
 #include <iostream>
+#include <queue>
+#include <functional>
+#include <cstdlib>
 
 using namespace std;
 
-extern int system_time;
 
 //Events
 enum event_type {
@@ -31,7 +33,7 @@ typedef struct Event {
 }Event;
 
 Event newEvent(event_type type, int time, int PID);
-Event newEvent(event_type type);
+Event newEventB(event_type type);
 Event getEvent();
 int setEventTime(int time);
 int setEventProcess();
@@ -48,15 +50,10 @@ int newProcess();
 int getPID();
 
 //Random
-class Random {
-    private:
-        int random_number;
-    public:
-        Random();
-        Random(int SEED);
-        double getRandom();
-        double getRandomBounds(double min, double max);
-};
+void setSEED(int seed);
+double getRandom();
+double getRandomBounds(double min, double max);
+
 
 /*
 class EventGenerator {
@@ -68,6 +65,9 @@ class EventGenerator {
         Event getEvent();
 };
 */
+
+//Writing to log
+void writeToLog(Event event);
 
 
 
@@ -90,16 +90,16 @@ double getNETWORK_MIN();
 double getNETWORK_MAX();
 
 //Event Handlers
-void handlePROCESS_ARRIVED_SYSTEM(Event event);
-void handlePROCESS_EXITED_SYSTEM(Event event);
-void handlePROCESS_ARRIVED_CPU(Event event);
-void handlePROCESS_EXITED_CPU(Event event);
-void handlePROCESS_ARRIVED_DISK1(Event event);
-void handlePROCESS_EXITED_DISK1(Event event);
-void handlePROCESS_ARRIVED_DISK2(Event event);
-void handlePROCESS_EXITED_DISK2(Event event);
-void handlePROCESS_ARRIVED_NETWORK(Event event);
-void handlePROCESS_EXITED_NETWORK(Event event);
-void handleSIMULATION_FINISHED(Event event);
+void handlePROCESS_ARRIVED_SYSTEM(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue);
+void handlePROCESS_EXITED_SYSTEM(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue);
+void handlePROCESS_ARRIVED_CPU(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue);
+void handlePROCESS_EXITED_CPU(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue);
+void handlePROCESS_ARRIVED_DISK1(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue);
+void handlePROCESS_EXITED_DISK1(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue);
+void handlePROCESS_ARRIVED_DISK2(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue);
+void handlePROCESS_EXITED_DISK2(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue);
+void handlePROCESS_ARRIVED_NETWORK(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue);
+void handlePROCESS_EXITED_NETWORK(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue);
+void handleSIMULATION_FINISHED(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue);
 
 #endif
