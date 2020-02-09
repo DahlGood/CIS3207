@@ -11,189 +11,161 @@ bool DISK1_BUSY;
 bool DISK2_BUSY;
 bool NETWORK_BUSY;
 
-int system_time;
 
-void handlePROCESS_ARRIVED_SYSTEM(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
-    system_time = event.eventTime;
-    //May be a problem with data not being updated correctly. Maybe play with pointers to avoid having to return :)
+void handlePROCESS_ARRIVED_SYSTEM(Event &event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+    detailedLog(event, "");
     if(CPU_queue.size() != 0 || CPU_BUSY) {
+        detailedLog(event, "CPU queue");
         CPU_queue.push(event);
     }
     else {
-        event_queue.push(newEventB(PROCESS_ARRIVED_CPU));
+        event_queue.push(newEvent(PROCESS_ARRIVED_CPU, event.eventTime, event.eventProcess));
     }
+    event_queue.push(newEvent(PROCESS_ARRIVED_SYSTEM, event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX()), newProcess()));
 
-    //cout << "Old Event Type = " << event.eventType << endl;
-    //cout << "Old Event Time = " << event.eventTime << endl;
-    //cout << "Old Event PID = " << event.eventProcess << endl;
-    //Event new_event = newEventB(PROCESS_ARRIVED_CPU); // this might be a problemmmmm the newEventB function.
-    
-    //cout << "New Event Type = " << new_event.eventType << endl;
-    //cout << "New Event Time = " << new_event.eventTime << endl;
-    //cout << "New Event PID = " << new_event.eventProcess << endl;
-    
-    event_queue.push(newEvent(PROCESS_ARRIVED_SYSTEM, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , newProcess()));
-    /*
-        If CPU is occupied or queue is not empty
-            put process on CPU queue
-        Elso
-            create new event process arrive cpu
-                event time = time from old event.
-                set CPU to occupied.
-        Create new event for process arrival
-            event time = current system time + random interval
-            create new process with a unique ID
-    */
 }
 
-void handlePROCESS_EXITED_SYSTEM(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
-    //event_queue.pop();
+void handlePROCESS_EXITED_SYSTEM(Event &event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+    detailedLog(event, "");
+    //Doing nothing. Process doesnt spawn any new events and it's just popped off the event queue.
 }
 
-void handlePROCESS_ARRIVED_CPU(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
-    /*
-    create new event PROCESS_FINISH_CPU
-    event time = new time
-    */
+void handlePROCESS_ARRIVED_CPU(Event &event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+    detailedLog(event, "");
     CPU_BUSY = true;
-    event_queue.push(newEvent(PROCESS_EXITED_CPU, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
+    event_queue.push(newEvent(PROCESS_EXITED_CPU, (event.eventTime + getRandomBounds(1, 100)) , event.eventProcess));
 
 }
 
-void handlePROCESS_EXITED_CPU(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+void handlePROCESS_EXITED_CPU(Event &event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+    
+    detailedLog(event, "");
     CPU_BUSY = false;
+
     double randomProb = getRandomBounds(1, 100);
     
     if(randomProb < getQUIT_PROB()) {
-        cout << "quit\n";
-        event_queue.push(newEventB(PROCESS_EXITED_SYSTEM));
+        event_queue.push(newEvent(PROCESS_EXITED_SYSTEM, event.eventTime, event.eventProcess));
     }
     else if(randomProb < getNETWORK_PROB()) {
-        cout << "network\n";
         if(NETWORK_queue.size() != 0 || NETWORK_BUSY) {
-            cout << "network queue\n";
+            detailedLog(event, "Network Queue");
             NETWORK_queue.push(event);
         }
         else {
-            cout << "network push\n";
-            event_queue.push(newEvent(PROCESS_ARRIVED_NETWORK, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
+            event_queue.push(newEvent(PROCESS_ARRIVED_NETWORK, event.eventTime + getRandomBounds(getNETWORK_MIN(), getNETWORK_MAX()), event.eventProcess));
         }
     }
     else {
-        cout << "disk1\n";
-        if(DISK1_queue.size() < DISK2_queue.size() || DISK2_BUSY) {
+        if(DISK1_queue.size() <= DISK2_queue.size() || DISK2_BUSY) {
             if(DISK1_BUSY) {
-                cout << "disk1 queue\n";
-                DISK1_queue.push(event);
+                detailedLog(event, "Disk 1 Queue");
+                DISK1_queue.push(newEvent(PROCESS_ARRIVED_DISK1, event.eventTime, event.eventProcess));
             }
             else {
-                cout << "disk1 push\n";
-                event_queue.push(newEvent(PROCESS_ARRIVED_DISK1, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
+                event_queue.push(newEvent(PROCESS_ARRIVED_DISK1, event.eventTime + getRandomBounds(getDISK1_MIN(), getDISK1_MAX()), event.eventProcess));
             }
         }
         else {
             if(DISK2_BUSY) {
-                cout << "disk2 queue\n";
-                DISK2_queue.push(event);
+                detailedLog(event, "Disk 2 Queue");
+                DISK2_queue.push(newEvent(PROCESS_ARRIVED_DISK2, event.eventTime, event.eventProcess));
             }
             else {
-                cout << "disk2 push\n";
-                event_queue.push(newEvent(PROCESS_ARRIVED_DISK2, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
+                event_queue.push(newEvent(PROCESS_ARRIVED_DISK2, event.eventTime, event.eventProcess));
             }
         }
         
     }
 
+    //Now that the CPU is free, check to see if something is on the CPU Queue.
     if(CPU_queue.size() != 0) {
+        //Handle process arrival to the CPU for the first element in the queue and say this occurs at the last eventTime + random CPU arrival time.
+        event_queue.push(newEvent(PROCESS_ARRIVED_CPU, event.eventTime, CPU_queue.front().eventProcess));
+        //Now that we pushed the most recent queue item, remove it from the queue.
         CPU_queue.pop();
-        event = CPU_queue.front();
-        event_queue.push(newEvent(PROCESS_ARRIVED_CPU, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
-
     }
-
-    /*
-    if random(random double between 0 and 1 < QUIT_PROB) {
-        create new event, PROCESS EXIT
-        assign process from old event to new __eventassign new event time to old event time aka process exit cpu happens at the same time as process exit system.
-        eventque.push
-    }
-
-    if it doesnt exit, decide what queue it goes into. DISK OR NETWORK
-    generate random number and decide if it goes to network.
-    If not network. Check if disk is occupied, if they both are choose the one with the smallest queue.
-        create new event disk process arrived on disk.
-    */
-    //In each process handle, you create the next ptocess
-    //The exit events have the responsibility of checking the queue.
-    //If the queue is not empty, create a new event process arrived on CPU
 }
 
-void handlePROCESS_ARRIVED_DISK1(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+void handlePROCESS_ARRIVED_DISK1(Event &event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+    detailedLog(event, "");
     DISK1_BUSY = true;
-    event_queue.push(newEvent(PROCESS_EXITED_DISK1, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventType));
+    //Process leaves the disk after spending a randomly generated time on the disk.
+    event_queue.push(newEvent(PROCESS_EXITED_DISK1, event.eventTime + getRandomBounds(getDISK1_MIN(), getDISK1_MAX()), event.eventProcess));
 }
 
-void handlePROCESS_EXITED_DISK1(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
-    /*
-    Set disk to not occupied
-    IF cpu occupied 
-        pur process on the cpu queue
-    */
+void handlePROCESS_EXITED_DISK1(Event &event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+    detailedLog(event, "");
     DISK1_BUSY = false;
     if(CPU_queue.size() != 0 || CPU_BUSY) {
-        CPU_queue.push(event);
+        detailedLog(event, "CPU Queue");
+        CPU_queue.push(newEvent(PROCESS_ARRIVED_CPU, event.eventTime, event.eventProcess));
     }
-    event_queue.push(newEventB(PROCESS_ARRIVED_CPU));
-
+    else {
+        //Not adding time because the time the process spent on the disk was given by the calling function. Basically saying once a process is told to leave the disk, it doesnt take any meaningful amount of time to leave.
+        event_queue.push(newEvent(PROCESS_ARRIVED_CPU, event.eventTime, event.eventProcess));
+    }
+    
+    //Now that the Disk is free, check to see if something is on the CPU Queue.
     if(DISK1_queue.size() != 0) {
+        event_queue.push(newEvent(PROCESS_ARRIVED_DISK1, event.eventTime, DISK1_queue.front().eventProcess));
         DISK1_queue.pop();
-        event_queue.push(newEvent(PROCESS_ARRIVED_DISK1, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
     }
 
 }
 
-void handlePROCESS_ARRIVED_DISK2(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+void handlePROCESS_ARRIVED_DISK2(Event &event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+    detailedLog(event, "");
     DISK2_BUSY = true;
-    event_queue.push(newEvent(PROCESS_EXITED_DISK2, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
+    event_queue.push(newEvent(PROCESS_EXITED_DISK2, event.eventTime + getRandomBounds(getDISK2_MIN(), getDISK2_MAX()), event.eventProcess));
 }
 
-void handlePROCESS_EXITED_DISK2(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
-
+void handlePROCESS_EXITED_DISK2(Event &event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+    detailedLog(event, "");
     DISK2_BUSY = false;
     if(CPU_queue.size() != 0 || CPU_BUSY) {
-        CPU_queue.push(event);
+        detailedLog(event, "CPU Queue");
+        CPU_queue.push(newEvent(PROCESS_ARRIVED_CPU, event.eventTime, event.eventProcess));
     }
-    event_queue.push(newEventB(PROCESS_ARRIVED_CPU));
+    else {
+        event_queue.push(newEvent(PROCESS_ARRIVED_CPU, event.eventTime, event.eventProcess));
+    }
 
     if(DISK2_queue.size() != 0) {
+        event_queue.push(newEvent(PROCESS_ARRIVED_DISK2, event.eventTime, DISK2_queue.front().eventProcess));
         DISK2_queue.pop();
-        event_queue.push(newEvent(PROCESS_ARRIVED_DISK2, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
     }
 }
 
-void handlePROCESS_ARRIVED_NETWORK(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+void handlePROCESS_ARRIVED_NETWORK(Event &event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+    detailedLog(event, "");
     NETWORK_BUSY = true;
-    event_queue.push(newEvent(PROCESS_EXITED_NETWORK, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
+    event_queue.push(newEvent(PROCESS_EXITED_NETWORK, event.eventTime + getRandomBounds(getNETWORK_MIN(), getNETWORK_MAX()), event.eventProcess));
 }
 
-void handlePROCESS_EXITED_NETWORK(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+void handlePROCESS_EXITED_NETWORK(Event &event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+    detailedLog(event, "");
     NETWORK_BUSY = false;
-    if(NETWORK_queue.size() != 0 || NETWORK_BUSY) {
-        CPU_queue.push(event);
+    if(CPU_queue.size() != 0 || CPU_BUSY) {
+        detailedLog(event, "CPU Queue");
+        CPU_queue.push(newEvent(PROCESS_ARRIVED_CPU, event.eventTime, event.eventProcess));
     }
-    event_queue.push(newEventB(PROCESS_ARRIVED_CPU));
+    else {
+        event_queue.push(newEvent(PROCESS_ARRIVED_CPU, event.eventTime, event.eventProcess));
+    }
 
-    if(DISK1_queue.size() != 0) {
-        DISK1_queue.pop();
-        event_queue.push(newEvent(PROCESS_ARRIVED_NETWORK, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
+    if(NETWORK_queue.size() != 0) {
+        event_queue.push(newEvent(PROCESS_ARRIVED_NETWORK, event.eventTime, NETWORK_queue.front().eventProcess));
+        NETWORK_queue.pop();
     }
 }
 
-void handleSIMULATION_FINISHED(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
-        
+void handleSIMULATION_FINISHED(Event &event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+        detailedLog(event, "");
         //Finish writing to log file.
         //Write statistics to STAT file
         //Close all file handles
+
         exit(1);
         
 

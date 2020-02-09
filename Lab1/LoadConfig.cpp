@@ -6,27 +6,7 @@
 
 using namespace std;
 
-double SEED;
-double INIT_TIME;
-double FIN_TIME;
-double ARRIVE_MIN;
-double ARRIVE_MAX;
-double QUIT_PROB;
-double NETWORK_PROB;
-double CPU_MIN;
-double CPU_MAX;
-double DISK1_MIN;
-double DISK1_MAX;
-double DISK2_MIN;
-double DISK2_MAX;
-double NETWORK_MIN;
-double NETWORK_MAX;
-
 double config[15];
-
-int hello() {
-    return 20;
-}
 
 void loadConfig() {
     
@@ -57,6 +37,9 @@ void loadConfig() {
 
         i++;
     }
+    char* tokenized = strtok(buffer, "=");
+    tokenized = strtok(NULL, "=");
+    config[i] = atof(tokenized);
 
 }
 

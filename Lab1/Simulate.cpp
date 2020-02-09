@@ -1,16 +1,17 @@
 #include "Simulator.h"
-#include <queue>
 #include <functional>
 
 using namespace std;
 
-
 int main() {
-    
+
+    clearLog();
+
     //Loading Config File.
     loadConfig();
+    setProcessNames();
 
-    //Random Numbers.
+    //Random Numbers.  FIX THIS!!!!!
     //setSEED(getSEED());
     srand(time(NULL));
 
@@ -25,10 +26,9 @@ int main() {
     while(event_queue_size > 0) {
 
         current_event = event_queue.top();
-        cout << "At " << current_event.eventTime << " PID: " << current_event.eventProcess << " " << current_event.eventType << endl;
-        writeToLog(current_event);
         
         event_queue.pop();
+        
         event_queue_size = event_queue.size();
 
         switch(current_event.eventType) {

@@ -6,7 +6,3 @@ int newProcess() {
     PID++;
     return PID;
 }
-
-int getPID() {
-    return PID;
-}
