@@ -11,7 +11,10 @@ bool DISK1_BUSY;
 bool DISK2_BUSY;
 bool NETWORK_BUSY;
 
+int system_time;
+
 void handlePROCESS_ARRIVED_SYSTEM(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
+    system_time = event.eventTime;
     //May be a problem with data not being updated correctly. Maybe play with pointers to avoid having to return :)
     if(CPU_queue.size() != 0 || CPU_BUSY) {
         CPU_queue.push(event);
@@ -29,7 +32,7 @@ void handlePROCESS_ARRIVED_SYSTEM(Event event, priority_queue<Event, vector<Even
     //cout << "New Event Time = " << new_event.eventTime << endl;
     //cout << "New Event PID = " << new_event.eventProcess << endl;
     
-    event_queue.push(newEvent(PROCESS_ARRIVED_SYSTEM, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())), newProcess()));
+    event_queue.push(newEvent(PROCESS_ARRIVED_SYSTEM, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , newProcess()));
     /*
         If CPU is occupied or queue is not empty
             put process on CPU queue
@@ -53,43 +56,58 @@ void handlePROCESS_ARRIVED_CPU(Event event, priority_queue<Event, vector<Event>,
     event time = new time
     */
     CPU_BUSY = true;
-    event_queue.push(newEvent(PROCESS_EXITED_CPU, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())), event.eventProcess));
+    event_queue.push(newEvent(PROCESS_EXITED_CPU, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
 
 }
 
 void handlePROCESS_EXITED_CPU(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
     CPU_BUSY = false;
-    double randomProb = getRandomBounds(0, 1);
+    double randomProb = getRandomBounds(1, 100);
+    
     if(randomProb < getQUIT_PROB()) {
+        cout << "quit\n";
         event_queue.push(newEventB(PROCESS_EXITED_SYSTEM));
     }
     else if(randomProb < getNETWORK_PROB()) {
+        cout << "network\n";
         if(NETWORK_queue.size() != 0 || NETWORK_BUSY) {
+            cout << "network queue\n";
             NETWORK_queue.push(event);
         }
-        event_queue.push(newEvent(PROCESS_ARRIVED_NETWORK, event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX()), event.eventProcess));
+        else {
+            cout << "network push\n";
+            event_queue.push(newEvent(PROCESS_ARRIVED_NETWORK, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
+        }
     }
     else {
+        cout << "disk1\n";
         if(DISK1_queue.size() < DISK2_queue.size() || DISK2_BUSY) {
             if(DISK1_BUSY) {
+                cout << "disk1 queue\n";
                 DISK1_queue.push(event);
             }
             else {
-                event_queue.push(newEvent(PROCESS_ARRIVED_DISK1, event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX()), event.eventProcess));
+                cout << "disk1 push\n";
+                event_queue.push(newEvent(PROCESS_ARRIVED_DISK1, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
             }
         }
-        if(DISK2_BUSY) {
-            DISK2_queue.push(event);
-        }
         else {
-            event_queue.push(newEvent(PROCESS_ARRIVED_DISK2, event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX()), event.eventProcess));
+            if(DISK2_BUSY) {
+                cout << "disk2 queue\n";
+                DISK2_queue.push(event);
+            }
+            else {
+                cout << "disk2 push\n";
+                event_queue.push(newEvent(PROCESS_ARRIVED_DISK2, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
+            }
         }
+        
     }
 
     if(CPU_queue.size() != 0) {
         CPU_queue.pop();
         event = CPU_queue.front();
-        event_queue.push(newEvent(PROCESS_ARRIVED_CPU, event.eventTime, event.eventProcess));
+        event_queue.push(newEvent(PROCESS_ARRIVED_CPU, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
 
     }
 
@@ -112,7 +130,7 @@ void handlePROCESS_EXITED_CPU(Event event, priority_queue<Event, vector<Event>, 
 
 void handlePROCESS_ARRIVED_DISK1(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
     DISK1_BUSY = true;
-    event_queue.push(newEvent(PROCESS_EXITED_DISK1, event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX()), event.eventType));
+    event_queue.push(newEvent(PROCESS_EXITED_DISK1, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventType));
 }
 
 void handlePROCESS_EXITED_DISK1(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
@@ -129,14 +147,14 @@ void handlePROCESS_EXITED_DISK1(Event event, priority_queue<Event, vector<Event>
 
     if(DISK1_queue.size() != 0) {
         DISK1_queue.pop();
-        event_queue.push(newEvent(PROCESS_ARRIVED_DISK1, event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX()), event.eventProcess));
+        event_queue.push(newEvent(PROCESS_ARRIVED_DISK1, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
     }
 
 }
 
 void handlePROCESS_ARRIVED_DISK2(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
     DISK2_BUSY = true;
-    event_queue.push(newEvent(PROCESS_EXITED_DISK2, event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX()), event.eventProcess));
+    event_queue.push(newEvent(PROCESS_EXITED_DISK2, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
 }
 
 void handlePROCESS_EXITED_DISK2(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
@@ -149,13 +167,13 @@ void handlePROCESS_EXITED_DISK2(Event event, priority_queue<Event, vector<Event>
 
     if(DISK2_queue.size() != 0) {
         DISK2_queue.pop();
-        event_queue.push(newEvent(PROCESS_ARRIVED_DISK2, event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX()), event.eventProcess));
+        event_queue.push(newEvent(PROCESS_ARRIVED_DISK2, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
     }
 }
 
 void handlePROCESS_ARRIVED_NETWORK(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
     NETWORK_BUSY = true;
-    event_queue.push(newEvent(PROCESS_EXITED_NETWORK, event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX()), event.eventProcess));
+    event_queue.push(newEvent(PROCESS_EXITED_NETWORK, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
 }
 
 void handlePROCESS_EXITED_NETWORK(Event event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
@@ -167,7 +185,7 @@ void handlePROCESS_EXITED_NETWORK(Event event, priority_queue<Event, vector<Even
 
     if(DISK1_queue.size() != 0) {
         DISK1_queue.pop();
-        event_queue.push(newEvent(PROCESS_ARRIVED_NETWORK, event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX()), event.eventProcess));
+        event_queue.push(newEvent(PROCESS_ARRIVED_NETWORK, (event.eventTime + getRandomBounds(getARRIVE_MIN(), getARRIVE_MAX())) , event.eventProcess));
     }
 }
 

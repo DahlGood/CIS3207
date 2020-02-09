@@ -2,16 +2,17 @@
 #include <stdlib.h>
 #include <math.h>
 
-int random_number;
 void setSEED(int seed) {
     srand(seed);
-    random_number = rand();
 }
 
 double getRandom() {
-    return random_number;
+    return rand();
 }
 
-double getRandomBounds(double min, double max) {
-    return fmod(random_number, max-min) + min;
+double getRandomBounds(int min, int max) {
+    //double random_num = (fmod(rand(), max-min) + min)/100;
+    double random_num = rand() % max + min;
+    cout << "randomsss " << random_num << endl;
+    return random_num;
 }

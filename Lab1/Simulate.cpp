@@ -11,7 +11,8 @@ int main() {
     loadConfig();
 
     //Random Numbers.
-    setSEED(getSEED());
+    //setSEED(getSEED());
+    srand(time(NULL));
 
     //Creating Queues.    
     priority_queue<Event, vector<Event>, EventComparator> event_queue; //Vector is like a dynamic array
@@ -25,6 +26,7 @@ int main() {
 
         current_event = event_queue.top();
         cout << "At " << current_event.eventTime << " PID: " << current_event.eventProcess << " " << current_event.eventType << endl;
+        writeToLog(current_event);
         
         event_queue.pop();
         event_queue_size = event_queue.size();

@@ -52,7 +52,7 @@ int getPID();
 //Random
 void setSEED(int seed);
 double getRandom();
-double getRandomBounds(double min, double max);
+double getRandomBounds(int min, int max);
 
 
 /*

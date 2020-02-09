@@ -6,16 +6,16 @@
 
 void writeToLog(Event event) {
     //Opening a file.
-    ifstream io;
+    ofstream io;
     //Making sure file was opened correctly.
-    io.open("log.txt");
+    io.open("log.txt", ios::app);
     if(!io.is_open()) {
         cout << "Didn't open file correctly.";
         exit(EXIT_FAILURE);
     }
 
-    //io << "At " << event.eventTime << " Process " << event.eventProcess << " " << event.eventType << endl;
+    io << "At " << event.eventTime << " Process " << event.eventProcess << " " << event.eventType << endl;
 
-    //io.close();
+    io.close();
     
 }
