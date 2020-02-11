@@ -1,6 +1,13 @@
 # Lab 1: Discrete Event Simulation
 ## Author: Luke Dependahl
 
+### Core components
+*  The Queues
+   *  Event Queue - Priority Queue: to store every change the system makes.
+   *  CPU Queue - FIFO Queue: holds processes arriving to the CPU when it's busy.
+   *  Network Queue - FIFO Queue: holds processes arriving to the Network when it's busy.
+   *  DiskX Queue - FIFO Queue: holds processes arriving to the DiskX when it's busy. (X being 1 or 2)
+
 ### Program Workflow by Event
 1. Process Arrived System
    1. If CPU is busy or if there are processes waiting for the CPU, push process to the CPU Queue
@@ -16,3 +23,33 @@
    2. Request that the process be put back on the CPU (May be placed on the CPU queue or on the CPU).
    3. If there is a process in the devices queue, request that the process be put on the device.
 ![Basic-Disagram](general-workflow.png)
+
+
+### Individual Component Uses.
+*  Simulator.h
+   *  Declares Event struct.
+      *  Holds all information an event needs.
+   *  Contains every functions prototype here.
+   *  Creates comparator to be used by Event Queue.
+
+*  Simulate.cpp
+   *  Seeds a random number generator with the SEED from cofig.txt.
+   *  Initializes the Event Queue
+   *  Pushes intial events (Simulaton finish & first process arrival) to the Event Queue.
+   *  Loops through Event Queue and calls an Event Handler for each specific event type.
+
+*  LoadConfig.cpp
+   *  Loads a file name "config.txt" in a specified order. (Same order as config.txt in this repository)
+
+*  CreateEvent.cpp
+   *  Contains one function that creates an event with given information and returns the event.
+  
+*  CreateProcess.cpp
+   *  Increments the PID.
+
+*  Random.cpp
+   *  Generates a random number between two bounds.
+
+*  EventHandlers.cpp
+   *  Processes every event type. (Detailed explination here[LinkToWorkFlow](#Program-Workflow-by-Event))
+*  Stats.cpp
