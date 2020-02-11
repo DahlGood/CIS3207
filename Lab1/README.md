@@ -15,4 +15,4 @@
    1. Exit the device after X time has elapsed.
    2. Request that the process be put back on the CPU (May be placed on the CPU queue or on the CPU).
    3. If there is a process in the devices queue, request that the process be put on the device.
-4. ![Basic-Disagram](/CIS3207/Labs/Lab1/general-workflow.png)
+4. ![Basic-Disagram](general-workflow.png)
