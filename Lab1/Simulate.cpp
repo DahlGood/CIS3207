@@ -9,6 +9,7 @@ int main() {
     clearLog();
     loadConfig();
     setProcessNames();
+    printConfig(getConfig());
 
     //Random Numbers.
     srand(getSEED());
@@ -26,12 +27,15 @@ int main() {
         //This is where we van guarentee the size of the event queue after each handler is run, so we'll put the event queue information gatherer here.
         setEQ(event_queue.size());
 
+        //Saves the event on the queue that is to be processed.
         current_event = event_queue.top();
         
+        //Removes the event from the queue.
         event_queue.pop();
         
         event_queue_size = event_queue.size();
 
+        //Processes the event.
         switch(current_event.eventType) {
             case 0: handlePROCESS_ARRIVED_SYSTEM(current_event, event_queue);
                 break;

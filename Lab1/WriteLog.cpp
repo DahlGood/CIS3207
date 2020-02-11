@@ -24,6 +24,36 @@ void detailedLog(Event event, string action) {
     io.close();
 }
 
+void printConfig(double* config) {
+    //Opening a file.
+    ofstream io;
+    //Making sure file was opened correctly.
+    io.open("detailed_log.txt", ios::app);
+    if(!io.is_open()) {
+        cout << "Didn't open file correctly.";
+        exit(EXIT_FAILURE);
+    }
+
+    io << "SEED= " << config[0] << endl;
+    io << "INIT_TIME= " << config[1] << endl;
+    io << "FIN_TIME= " << config[2] << endl;
+    io << "ARRIVE_MIN= " << config[3] << endl;
+    io << "ARRIVE_MAX= " << config[4] << endl;
+    io << "QUIT_PROB= " << config[5] << endl;
+    io << "NETWORK_PROB= " << config[6] << endl;
+    io << "CPU_MIN= " << config[7] << endl;
+    io << "CPU_MAX= " << config[8] << endl;
+    io << "DISK1_MIN= " << config[9] << endl;
+    io << "DISK1_MAX= " << config[10] << endl;
+    io << "DISK2_MIN= " << config[11] << endl;
+    io << "DISK2_MIN= " << config[12] << endl;
+    io << "NETOWORK_MIN= " << config[13] << endl;
+    io << "NETOWORK_MAX= " << config[14] << endl;
+    io << "\n" << endl;
+
+}
+
+
 void printEvent(Event event) {
     cout << "At " << event.eventTime << " PID: " << event.eventProcess << " " << processName[event.eventType] << endl;
 }

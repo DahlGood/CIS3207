@@ -50,6 +50,7 @@ double getRandomBounds(int min, int max);
 //Writing to log
 void clearLog();
 void detailedLog(Event event, string action);
+void printConfig(double* config);
 void setProcessNames();
 void printEvent(Event event);
 void printQueue(priority_queue<Event, vector<Event>, EventComparator> event_queue);
@@ -120,6 +121,7 @@ double getDISK2_MIN();
 double getDISK2_MAX();
 double getNETWORK_MIN();
 double getNETWORK_MAX();
+double* getConfig();
 
 //Event Handlers
 void handlePROCESS_ARRIVED_SYSTEM(Event &event, priority_queue<Event, vector<Event>, EventComparator> &event_queue);

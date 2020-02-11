@@ -103,3 +103,7 @@ double getNETWORK_MIN() {
 double getNETWORK_MAX() {
     return config[14];
 }
+
+double* getConfig() {
+    return config;
+}

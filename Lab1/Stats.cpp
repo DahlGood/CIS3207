@@ -12,7 +12,7 @@ void writeStats() {
         cout << "Didn't open file correctly.";
         exit(EXIT_FAILURE);
     }
-    cout << "---------- Queues ----------" << endl;
+    io << "---------- Queues ----------" << endl;
     io << "Avg Event Queue Size: " << getAvgSizeEQ() << endl;
     io << "Max Event Queue Size: " << getMaxSizeEQ() << endl;
     io << "Avg CPU Queue Size: " << getAvgSizeCPUQ() << endl;
@@ -23,14 +23,16 @@ void writeStats() {
     io << "Max Disk2 Queue Size: " << getMaxSizeD2Q() << endl;
     io << "Avg Network Queue Size: " << getAvgSizeNQ() << endl;
     io << "Max Network Queue Size: " << getMaxSizeNQ() << endl;
+    io << "" << endl;
 
-    cout << "---------- Utilization ----------" << endl;
+    io << "---------- Utilization ----------" << endl;
     io << "Utilization of CPU: " << getUtilCPU() << endl;
     io << "Utilization of Disk1: " << getUtilD1() << endl;
     io << "Utilization of Disk2: " << getUtilD2() << endl;
     io << "Utilization of Network: " << getUtilN() << endl;
+    io << "" << endl;
 
-    cout << "---------- Response Time ----------" << endl;
+    io << "---------- Response Time ----------" << endl;
     io << "Avg Response Time of CPU: " << getAvgRespCPU() << endl;
     io << "Max Response Time of CPU: " << getMaxRespCPU() << endl;
     io << "Avg Response Time of Disk1: " << getAvgRespD1() << endl;
@@ -39,12 +41,14 @@ void writeStats() {
     io << "Max Response Time of Disk2: " << getMaxRespD2() << endl;
     io << "Avg Response Time of Network: " << getAvgRespN() << endl;
     io << "Max Response Time of Network: " << getMaxRespN() << endl;
+    io << "" << endl;
 
-    cout << "---------- Throughput ----------" << endl;
+    io << "---------- Throughput ----------" << endl;
     io << "Throughput of CPU: " << getTHPCPU() << endl;
     io << "Throughput of Disk1: " << getTHPD1() << endl;
     io << "Throughput of Disk2: " << getTHPD2() << endl;
     io << "Throughput of Network: " << getTHPN() << endl;
+    io << "" << endl;
 
     io.close();
 }
@@ -164,7 +168,6 @@ void setTimeD1Q(int respTime) {
 }
 void setTimeD2Q(int respTime) {
     totalResponseD2Q += respTime;
-    cout << "total time " << totalResponseD2Q << endl;
     if(respTime > maxResponseD2Q) {
         maxResponseD2Q = respTime;
     }
