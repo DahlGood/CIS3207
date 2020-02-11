@@ -45,5 +45,6 @@
 *  Random.cpp
    *  Generates a random number between two bounds.
 *  EventHandlers.cpp
-   *  Processes every event type. (Detailed explination [here](#Program-Workflow-by-Event))
+   *  Handles every event type. (Detailed explination [here](#Program-Workflow-by-Event))
 *  Stats.cpp
+   *  Gathers all stats using setters placed at every arrival event and every push to device queue call.
