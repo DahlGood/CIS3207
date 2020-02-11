@@ -39,6 +39,7 @@ void printQueue(priority_queue<Event, vector<Event>, EventComparator> event_queu
 void clearLog() {
     remove("log.txt");
     remove("detailed_log.txt");
+    remove("stats.txt");
 
 }
 

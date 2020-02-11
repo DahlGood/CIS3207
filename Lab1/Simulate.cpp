@@ -5,25 +5,26 @@ using namespace std;
 
 int main() {
 
-    clearLog();
-
     //Loading Config File.
+    clearLog();
     loadConfig();
     setProcessNames();
 
-    //Random Numbers.  FIX THIS!!!!!
-    //setSEED(getSEED());
-    srand(time(NULL));
+    //Random Numbers.
+    srand(getSEED());
 
     //Creating Queues.    
     priority_queue<Event, vector<Event>, EventComparator> event_queue; //Vector is like a dynamic array
 
-    event_queue.push(newEvent(SIMULATION_FINISHED, getFIN_TIME(), getPID()));
+    event_queue.push(newEvent(SIMULATION_FINISHED, getFIN_TIME(), 1));
     event_queue.push(newEvent(PROCESS_ARRIVED_SYSTEM, getINIT_TIME(), newProcess()));
 
     int event_queue_size = event_queue.size();
     Event current_event;
     while(event_queue_size > 0) {
+
+        //This is where we van guarentee the size of the event queue after each handler is run, so we'll put the event queue information gatherer here.
+        setEQ(event_queue.size());
 
         current_event = event_queue.top();
         

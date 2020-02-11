@@ -42,9 +42,9 @@ struct EventComparator {
 
 //Process
 int newProcess();
+int getProcess();
 
 //Random
-void setSEED(int seed);
 double getRandomBounds(int min, int max);
 
 //Writing to log
@@ -54,7 +54,54 @@ void setProcessNames();
 void printEvent(Event event);
 void printQueue(priority_queue<Event, vector<Event>, EventComparator> event_queue);
 
+//Stats
+void writeStats();
+void setEQ(int size);
+void setCPUQ(int size);
+void setD1Q(int size);
+void setD2Q(int size);
+void setNQ(int size);
 
+void setTimeCPUQ(int respTime);
+void setTimeD1Q(int respTime);
+void setTimeD2Q(int respTime);
+void setTimeNQ(int respTime);
+
+void setUsedCPUQ();
+void setUsedD1Q();
+void setUsedD2Q();
+void setUsedNQ();
+
+double getAvgSizeEQ();
+double getAvgSizeCPUQ();
+double getAvgSizeD1Q();
+double getAvgSizeD2Q();
+double getAvgSizeNQ();
+
+double getMaxSizeEQ();
+double getMaxSizeCPUQ();
+double getMaxSizeD1Q();
+double getMaxSizeD2Q();
+double getMaxSizeNQ();
+
+double getUtilCPU();
+double getUtilD1();
+double getUtilD2();
+double getUtilN();
+
+double getAvgRespCPU();
+double getAvgRespD1();
+double getAvgRespD2();
+double getAvgRespN();
+
+double getMaxRespCPU();
+double getMaxRespD1();
+double getMaxRespD2();
+double getMaxRespN();
+double getTHPCPU();
+double getTHPD1();
+double getTHPD2();
+double getTHPN();
 
 //All required functions for LoadConfig.cpp
 void loadConfig();
