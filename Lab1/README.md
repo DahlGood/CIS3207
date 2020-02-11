@@ -31,25 +31,19 @@
       *  Holds all information an event needs.
    *  Contains every functions prototype here.
    *  Creates comparator to be used by Event Queue.
-
 *  Simulate.cpp
    *  Seeds a random number generator with the SEED from cofig.txt.
    *  Initializes the Event Queue
    *  Pushes intial events (Simulaton finish & first process arrival) to the Event Queue.
    *  Loops through Event Queue and calls an Event Handler for each specific event type.
-
 *  LoadConfig.cpp
    *  Loads a file name "config.txt" in a specified order. (Same order as config.txt in this repository)
-
 *  CreateEvent.cpp
    *  Contains one function that creates an event with given information and returns the event.
-  
 *  CreateProcess.cpp
    *  Increments the PID.
-
 *  Random.cpp
    *  Generates a random number between two bounds.
-
 *  EventHandlers.cpp
-   *  Processes every event type. (Detailed explination here[LinkToWorkFlow](#Program-Workflow-by-Event))
+   *  Processes every event type. (Detailed explination [here](#Program-Workflow-by-Event))
 *  Stats.cpp
