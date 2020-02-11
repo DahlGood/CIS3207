@@ -16,4 +16,4 @@
    2. Request that the process be put back on the CPU (May be placed on the CPU queue or on the CPU).
    3. If there is a process in the devices queue, request that the process be put on the device.
 ![Basic-Disagram](general-workflow.png)
-no woots
+please woots
