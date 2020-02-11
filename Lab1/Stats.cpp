@@ -246,56 +246,36 @@ double getAvgRespD1() {
     return (double)totalResponseD1Q / (double)totalUsedD1Q;
 }
 double getAvgRespD2() {
-    //Error because D2 is never used.
     return (double)totalResponseD2Q / (double)totalUsedD2Q;
-    
 }
 double getAvgRespN() {
-    
     return (double)totalResponseNQ / (double)totalUsedNQ;
-    
 }
 
 double getMaxRespCPU() {
-    
     return maxResponseCPUQ;
-    
 }
 double getMaxRespD1() {
-    
     return maxResponseD1Q;
-    
 }
 double getMaxRespD2() {
-    
     return maxResponseD2Q;
-    
 }
 double getMaxRespN() {
-    
     return maxResponseNQ;
-    
 }
 
 double getTHPCPU() {
-    
-    return totalUsedCPUQ / getFIN_TIME();
-    
+    return totalUsedCPUQ / (double)totalResponseCPUQ;
 }
 double getTHPD1() {
-    
-    return totalUsedD1Q / getFIN_TIME();
-    
+    return totalUsedD1Q / (double)totalResponseD1Q;
 }
 double getTHPD2() {
-    
     return totalUsedD2Q / getFIN_TIME();
-    
 }
 double getTHPN() {
-    
     return totalUsedNQ / getFIN_TIME();
-    
 }
 
 
