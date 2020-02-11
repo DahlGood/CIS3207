@@ -11,7 +11,7 @@ wunzip
 ### Giorgio's Discrete Event Simulator
 #### Program to simulate the most basic relationships and machanisms of the CPU, Disks, and Network.
 
-###### Program Flow
+##### Program Flow:
 1. Process arrives to the system.
 1. Process is sent to the CPU to be processed.
 1. Process arrives to the CPU.
