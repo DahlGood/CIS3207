@@ -32,7 +32,7 @@
    *  Contains every functions prototype here.
    *  Creates comparator to be used by Event Queue.
 *  Simulate.cpp
-   *  Seeds a random number generator with the SEED from cofig.txt.
+   *  Seeds a random number generator with the SEED from config.txt.
    *  Initializes the Event Queue
    *  Pushes intial events (Simulaton finish & first process arrival) to the Event Queue.
    *  Loops through Event Queue and calls an Event Handler for each specific event type.
