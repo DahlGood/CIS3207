@@ -46,6 +46,7 @@ void handlePROCESS_EXITED_SYSTEM(Event &event, priority_queue<Event, vector<Even
 
 void handlePROCESS_ARRIVED_CPU(Event &event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
     detailedLog(event, "");
+    setUsedCPU();
     //Since a process arrived to the device, we say it's busy (busy processing).
     CPU_BUSY = true;
     //Creating a new time based on the most recent event time + a randomly generated number based on the min and max times it takes for a process to run in the CPU.
@@ -138,6 +139,7 @@ void handlePROCESS_EXITED_CPU(Event &event, priority_queue<Event, vector<Event>,
 
 void handlePROCESS_ARRIVED_DISK1(Event &event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
     detailedLog(event, "");
+    setUsedD1();
     DISK1_BUSY = true;
     new_time = event.eventTime + getRandomBounds(getDISK1_MIN(), getDISK1_MAX());
     setTimeD1Q(new_time - event.eventTime);
@@ -175,6 +177,7 @@ void handlePROCESS_EXITED_DISK1(Event &event, priority_queue<Event, vector<Event
 void handlePROCESS_ARRIVED_DISK2(Event &event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
     //Same logic as arrived disk 1.
     detailedLog(event, "");
+    setUsedD2();
     DISK2_BUSY = true;
     new_time = event.eventTime + getRandomBounds(getDISK2_MIN(), getDISK2_MAX());
     setTimeD2Q(new_time - event.eventTime);
@@ -205,6 +208,7 @@ void handlePROCESS_EXITED_DISK2(Event &event, priority_queue<Event, vector<Event
 void handlePROCESS_ARRIVED_NETWORK(Event &event, priority_queue<Event, vector<Event>, EventComparator> &event_queue) {
     //Same logic as the disks.
     detailedLog(event, "");
+    setUsedN();
     NETWORK_BUSY = true;
     new_time = event.eventTime + getRandomBounds(getNETWORK_MIN(), getNETWORK_MAX());
     setTimeNQ(new_time - event.eventTime);

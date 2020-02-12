@@ -56,6 +56,8 @@ void printEvent(Event event);
 void printQueue(priority_queue<Event, vector<Event>, EventComparator> event_queue);
 
 //Stats
+
+//Queue sizes.
 void writeStats();
 void setEQ(int size);
 void setCPUQ(int size);
@@ -63,38 +65,52 @@ void setD1Q(int size);
 void setD2Q(int size);
 void setNQ(int size);
 
+//Response times.
 void setTimeCPUQ(int respTime);
 void setTimeD1Q(int respTime);
 void setTimeD2Q(int respTime);
 void setTimeNQ(int respTime);
 
+//Number of times a process was pushed to a device queue.
 void setUsedCPUQ();
 void setUsedD1Q();
 void setUsedD2Q();
 void setUsedNQ();
 
+//Number of times a process used a device.
+void setUsedEQ();
+void setUsedCPU();
+void setUsedD1();
+void setUsedD2();
+void setUsedN();
+
+//Average size of each queue.
 double getAvgSizeEQ();
 double getAvgSizeCPUQ();
 double getAvgSizeD1Q();
 double getAvgSizeD2Q();
 double getAvgSizeNQ();
 
+//Max size of each queue.
 double getMaxSizeEQ();
 double getMaxSizeCPUQ();
 double getMaxSizeD1Q();
 double getMaxSizeD2Q();
 double getMaxSizeNQ();
 
+//Utilization of each device.
 double getUtilCPU();
 double getUtilD1();
 double getUtilD2();
 double getUtilN();
 
+//Average response time of each device.
 double getAvgRespCPU();
 double getAvgRespD1();
 double getAvgRespD2();
 double getAvgRespN();
 
+//Max response time of each device.
 double getMaxRespCPU();
 double getMaxRespD1();
 double getMaxRespD2();

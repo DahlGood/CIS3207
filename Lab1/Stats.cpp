@@ -59,17 +59,17 @@ int totalSizeCPUQ = 0;
 int totalSizeD1Q = 0;
 int totalSizeD2Q = 0;
 int totalSizeNQ = 0;
+
 int totalUsedEQ = 0;
 int totalUsedCPUQ = 0;
 int totalUsedD1Q = 0;
 int totalUsedD2Q = 0;
 int totalUsedNQ = 0;
 
-int totalTimeEQ = 0;
-int totalTimeCPUQ = 0;
-int totalTimeD1Q = 0;
-int totalTimeD2Q = 0;
-int totalTimeNQ = 0;
+int totalUsedCPU = 0;
+int totalUsedD1 = 0;
+int totalUsedD2 = 0;
+int totalUsedN = 0;
 
 int maxSizeEQ = 0;
 int maxSizeCPUQ = 0;
@@ -114,7 +114,6 @@ int thpNQ = 0;
 
 void setEQ(int size) {
     totalSizeEQ += size;
-    totalUsedEQ++;
     if(size > maxSizeEQ) {
         maxSizeEQ = size;
     }
@@ -123,7 +122,6 @@ void setEQ(int size) {
 
 void setCPUQ(int size) {
     totalSizeCPUQ += size;
-    totalUsedCPUQ++;
     if(size > maxSizeCPUQ) {
         maxSizeCPUQ = size;
     }
@@ -131,7 +129,6 @@ void setCPUQ(int size) {
 
 void setD1Q(int size) {
     totalSizeD1Q += size;
-    totalUsedD1Q++;
     if(size > maxSizeD1Q) {
         maxSizeD1Q = size;
     }
@@ -139,7 +136,6 @@ void setD1Q(int size) {
 
 void setD2Q(int size) {
     totalSizeD2Q += size;
-    totalUsedD2Q++;
     if(size > maxSizeD2Q) {
         maxSizeD2Q = size;
     }
@@ -147,7 +143,6 @@ void setD2Q(int size) {
 
 void setNQ(int size) {
     totalSizeNQ += size;
-    totalUsedNQ++;
     if(size > maxSizeNQ) {
         maxSizeNQ = size;
     }
@@ -179,6 +174,9 @@ void setTimeNQ(int respTime) {
     }
 }
 
+void setUsedEQ() {
+    totalUsedEQ++;
+}
 void setUsedCPUQ() {
     totalUsedCPUQ++;
 }
@@ -192,37 +190,51 @@ void setUsedNQ() {
     totalUsedNQ++;
 }
 
+void setUsedCPU() {
+    totalUsedCPU++;
+}
+void setUsedD1() {
+    totalUsedD1++;
+}
+void setUsedD2() {
+    totalUsedD2++;
+}
+void setUsedN() {
+    totalUsedN++;
+}
+
+
 
 double getAvgSizeEQ() {
-    return (double)totalSizeEQ / totalSizeEQ;
+    return totalSizeEQ / totalUsedEQ;
 }
 double getAvgSizeCPUQ() {
-    return (double)totalSizeCPUQ / totalSizeCPUQ;
+    return totalSizeCPUQ / totalUsedCPUQ;
 }
 double getAvgSizeD1Q() {
-    return (double)totalSizeD1Q / totalSizeD1Q;
+    return totalSizeD1Q / totalUsedD1Q;
 }
 double getAvgSizeD2Q() {
-    return (double)totalSizeD2Q / totalSizeD2Q;
+    return totalSizeD2Q / totalUsedD2Q;
 }
 double getAvgSizeNQ() {
-    return (double)totalSizeNQ / totalSizeNQ;
+    return totalSizeNQ / totalUsedNQ;
 }
 
 double getMaxSizeEQ() {
-    return totalSizeEQ;
+    return maxSizeEQ;
 }
 double getMaxSizeCPUQ() {
-    return totalSizeCPUQ;
+    return maxSizeCPUQ;
 }
 double getMaxSizeD1Q() {
-    return totalSizeD1Q;
+    return maxSizeD1Q;
 }
 double getMaxSizeD2Q() {
-    return totalSizeD2Q;
+    return maxSizeD2Q;
 }
 double getMaxSizeNQ() {
-    return totalSizeNQ;
+    return maxSizeNQ;
 }
 
 double getUtilCPU() {
@@ -266,16 +278,16 @@ double getMaxRespN() {
 }
 
 double getTHPCPU() {
-    return totalUsedCPUQ / (double)totalResponseCPUQ;
+    return totalUsedCPU / getFIN_TIME();
 }
 double getTHPD1() {
-    return totalUsedD1Q / (double)totalResponseD1Q;
+    return totalUsedD1 / getFIN_TIME();
 }
 double getTHPD2() {
-    return totalUsedD2Q / getFIN_TIME();
+    return totalUsedD2 / getFIN_TIME();
 }
 double getTHPN() {
-    return totalUsedNQ / getFIN_TIME();
+    return totalUsedN / getFIN_TIME();
 }
 
 

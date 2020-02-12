@@ -29,6 +29,8 @@ int main() {
 
         //Saves the event on the queue that is to be processed.
         current_event = event_queue.top();
+        setEQ(event_queue.size());
+        setUsedEQ();
         
         //Removes the event from the queue.
         event_queue.pop();
