@@ -1,0 +1,20 @@
+//Main program
+
+while(user chooses not to manually exit (aka 1)) {
+
+    vector<string> input;
+
+    string user_command = get user input from stdin;
+
+    if (user_input == exit) {
+        exit(0)
+    }
+
+    command_token = tokenize user_command;
+
+    while(command_token != NULL) {
+        input.add(command_token);
+    }
+
+
+}
