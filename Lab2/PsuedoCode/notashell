@@ -1,20 +1,50 @@
 //Main program
 
-while(user chooses not to manually exit (aka 1)) {
+main(args) {
 
-    vector<string> input;
+    if(args > 1 ) { aka if there was a file passed :)
 
-    string user_command = get user input from stdin;
+        while(not at EOF) {
+            user_input = get user input from file;
+            processCommand();
+        }
+        
 
-    if (user_input == exit) {
-        exit(0)
+    }
+    else {
+
+        `while(user chooses not to manually exit (aka 1)) {
+            string user_input = get user input from cin;
+            processCommand();
+        }
+
     }
 
-    command_token = tokenize user_command;
+}
 
+processCommand(command) {
+
+    command_token = tokenize user_command;
     while(command_token != NULL) {
+        command_token = tokenize user_command;
         input.add(command_token);
     }
 
+    we now know what program is going to run (the first item in the vector). Now lets evaluate the other arguments.
+
+    if (user_input == exit) {
+        exit
+    }
+
+    whatami = fork();
+
+    if(child) { aka whatami = 0
+        exec(program specified)
+    }
+    else {
+        wait(until childs done);
+    }
 
 }
+
+
