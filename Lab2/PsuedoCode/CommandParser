@@ -1,0 +1,91 @@
+array operators = {<, <<, >>, >, &, |}
+
+boolean containsPipe;
+vector<char> containsRedirect;
+boolean containsBackgroundExecution;
+
+
+////////////////////////////////////////////////////////////////////////
+METHOD THAT WOULD ALLOW FOR MULTIPLE PIPES AND REDIRECTIONS (NOR USING)
+////////////////////////////////////////////////////////////////////////
+vector parseInput(input) {
+    vector<vector<string>> parsed_input;
+    command_token = tokenize input;
+    
+    i = 0
+    while(command_token != NULL) {
+        if(command_token == |) {
+            parsed_input.add(|)
+            i++
+        }
+        else if(command_token == <, <<, >>, >) {
+            parsed_input.at(i).add(<, <<, >>, >)
+            i++
+        }
+        else if(command_token == &) {
+            parsed_input.add(&)
+            i++
+        }
+        else {
+            parsed_input.at(i).add(command_token);
+        }
+        
+        command_token = tokenize input
+    }
+    
+    return parsed_input;
+
+}
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////
+             ONLY ACCOUNTING FOR ONE PIPE OR REDIRECTIOON
+////////////////////////////////////////////////////////////////////////
+
+
+//Groups commands into individual vectors so the name of the commands and it's arguments can easily be converted to an array and be passed to exec later.
+vector input parseInput(string input) {
+    vector<vector<string>> parsed_input;
+    command_token = tokenize input;
+    
+    i = 0
+    while(command_token != NULL) {
+        if(operators.contains(command_token)) {
+            parsed_input.add(command_token);
+        }
+        else {
+            parsed_input.at(i).add(command_token)
+        }
+        i++
+        parsed_input.add(command_token);
+        command_token = tokenize input
+    }
+
+    return parsed_input
+}
+
+setPipes() {
+    containsPipe = true
+}
+setRedirects() {
+    containsRedirect = true
+
+}
+setBackgroundExecution() {
+    containsBackgroundExecution = true
+}
+
+
+getPipes() {
+    return containsPipe
+}
+getRedirects() {
+    return containsRedirect
+}
+int getBackgroundExecution() {
+    return containsBackgroundExecution
+}

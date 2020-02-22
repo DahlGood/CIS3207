@@ -1,0 +1,64 @@
+cd(char* path) {
+
+    chdir(path);
+
+}
+
+clr() {
+
+    Clear the screen
+    printf("\033[H\033[2J");
+
+}
+
+dir() {
+    
+    current_path = GetCurrentDirectory()
+    if(GetCurrentDirectory wasnt successful) {
+        print what went wrong.
+    }
+    for(all entries in directory_iterator(path)) {
+        print entry.path();
+    }
+
+}
+
+dir(string path) {
+
+    current_path = GetCurrentDirectory()
+    for(all entryies in directory_iterator(path)) {
+        print entry.path();
+    }
+
+}
+
+environ() {
+    print getenv("USER"); //they dont deserve anything else.
+
+}
+
+echo(string arg) {
+    return arg
+}
+
+help() {
+
+}
+
+pause() {
+
+    while (user input != '\n') {
+
+    }
+
+}
+
+quit() {
+
+    exit()
+
+}
+
+help() {
+    print help
+}

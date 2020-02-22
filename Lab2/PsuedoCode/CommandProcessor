@@ -1,0 +1,84 @@
+
+enum {
+    PIPE = 1
+    REDIRECT = 2
+    BACKGROUND_EXECUTION = 3
+}
+
+
+//
+
+In each of these functions, assume that we're checking to see if the command is a built in command.
+Leaving this code out for simplicities sake.
+The logic would be the same except instead of execing we'd just call the function.
+
+//
+
+
+processPipe(vector parsed_input) {
+    int fd[]
+    pipe(fd)
+
+    if(built in commands) {
+
+    }
+    else {
+        int pid_right = fork()
+        if(pid_right == 0) {
+            alter appropriate fd
+            exec(parsed_input.at(1).at(0), parsed_input.at(1))
+        }
+        else {
+            wait() to sync parent and child
+        }
+
+        int pid_left = fork()
+        if(pid_left == 0) {
+            alter appropriate fd
+            exec(parsed_input.at(0).at(0), parsed_input.at(0))
+        }
+        else {
+            wait()
+        }
+
+    }
+
+
+    
+
+}
+
+
+processRedirect(vector parsed_input) {
+    open file specified in index
+    dup appropriate file descriptors
+
+    fork()
+    if(child) {
+        exec() appropriate commands
+    }
+
+
+}
+
+processBackground(vector parsed_input) {
+    
+    int index = find index of &
+
+    //handleing left side of &
+    fork()
+    if(child) {
+        process appropriate command for everything before index of &
+        processX()
+    }
+
+    
+
+    //handling right side of &
+    fork()
+    if(child) {
+        process appropriate command for everything after index of &
+        processX()
+    }
+
+}
