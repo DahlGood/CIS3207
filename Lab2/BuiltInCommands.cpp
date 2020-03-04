@@ -1,13 +1,12 @@
 #include "Shell.h"
 #include <unistd.h>
+#include <dirent.h>
 
 
 void cd(char* path) {
 
     //Skips to a new line.
     cout << endl;
-
-    
 
     try
     {
@@ -35,57 +34,103 @@ void clr() {
     //printf("\033[H\033[2J");
     cout << "\033[H\033[2J" << endl;
 
+    printStatus();
+
 }
-/*
+
 void dir() {
-    
-    current_path = GetCurrentDirectory()
-    if(GetCurrentDirectory wasnt successful) {
-        print what went wrong.
-    }
-    for(all entries in directory_iterator(path)) {
-        print entry.path();
-    }
 
-}
+    DIR *directory = NULL;
 
-void dir(string path) {
+    struct dirent *directoryInfo = NULL;
 
-    current_path = GetCurrentDirectory()
-    for(all entryies in directory_iterator(path)) {
-        print entry.path();
+    directory = opendir(".");
+    if(directory == NULL) {
+        cout << "Error: Couldn't open directory." << endl;
     }
 
+    while((directoryInfo = readdir(directory))) {
+        if(directoryInfo == NULL) {
+            cout << "Error: Couldn't read directory." << endl;
+        }
+
+        cout << directoryInfo->d_name << endl;
+    }
+
+    closedir(directory);
+
+    printStatus();
+
 }
 
-void environ() {
-    print getenv("USER"); //they dont deserve anything else.
+void dir(char* path) {
+
+    DIR *directory = NULL;
+
+    struct dirent *directoryInfo = NULL;
+
+    directory = opendir(path);
+    if(directory == NULL) {
+        cout << "Error: Couldn't open directory." << endl;
+    }
+
+    while((directoryInfo = readdir(directory))) {
+        if(directoryInfo == NULL) {
+            cout << "Error: Couldn't read directory." << endl;
+        }
+
+        cout << directoryInfo->d_name << endl;
+    }
+
+    closedir(directory);
+
+    printStatus();
 
 }
 
-void echo(string arg) {
-    return arg
+
+void myenviron() {
+
+    string path[] = {"HOST", "USER", "HOME", "PATH", "OSTYPE"};
+
+    //cout << getenv("PATH") << endl; //they dont deserve anything else.
+
+    for(string x : path) {
+        cout << x << " = " << getenv(x.c_str()) << endl;
+    }
+
+    printStatus();
+
 }
+
+
+void myecho(char* arg) {
+    if(arg == NULL) {
+        throw(-1);
+    }
+    cout << arg << endl;
+}
+
+void mypause() {
+    string waittill;
+    while(cin.get() != '\n') {
+        return;
+    }
+
+}
+
+void myquit() {
+
+    exit(0);
+
+}
+
 
 void help() {
-
+    cout << "print help pages?" << endl;
 }
 
-void pause() {
 
-    while (user input != '\n') {
-
-    }
-
-}
-
-void quit() {
-
-    exit()
-
-}
-
-*/
 
 
 void printStatus() {
