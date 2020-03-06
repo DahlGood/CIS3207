@@ -141,7 +141,7 @@ void printStatus() {
     //Prints the username and directory to make things pretty.
     char usernameBuffer[50];
     getUsername(usernameBuffer);
-    cout << usernameBuffer << ":~ "<< pathBuffer << ">";
+    cout << usernameBuffer << ":~ "<< pathBuffer << "> ";
     
     return;
 

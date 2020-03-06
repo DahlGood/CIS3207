@@ -22,6 +22,10 @@ int isBuiltIn(string command);
 void chooseDir(char* argument);
 void builtInRedirection(vector<char*> bashCommandsIncluded, vector<vector<char*> * > parsed_input);
 void processBuiltIn(vector<vector<char*> * > parsed_input);
+void externalRedirection(vector<char*> bashCommandsIncluded, vector<vector<char*> * > parsed_input);
+void externalPiping(vector<vector<char*> * > parsed_input);
+void externalBE(vector<vector<char*> * > parsed_input);
+void processExternal(vector<vector<char*> * > parsed_input);
 
 //Some helper commands defined in Shell.cpp
 void getUsername(char* username);
