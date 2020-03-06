@@ -6,7 +6,7 @@
 void cd(char* path) {
 
     //Skips to a new line.
-    cout << endl;
+    //cout << endl;
 
     try
     {
@@ -22,20 +22,13 @@ void cd(char* path) {
         cout << "Problem changing directories. Returned Value: " << returnedVal << endl;
     }
 
-    printStatus();
-    
+    return;
 
 }
-    
-
 
 void clr() {
-
-    //printf("\033[H\033[2J");
     cout << "\033[H\033[2J" << endl;
-
-    printStatus();
-
+    return;
 }
 
 void dir() {
@@ -59,7 +52,7 @@ void dir() {
 
     closedir(directory);
 
-    printStatus();
+    return;
 
 }
 
@@ -84,7 +77,7 @@ void dir(char* path) {
 
     closedir(directory);
 
-    printStatus();
+    return;
 
 }
 
@@ -99,7 +92,7 @@ void myenviron() {
         cout << x << " = " << getenv(x.c_str()) << endl;
     }
 
-    printStatus();
+    return;
 
 }
 
@@ -109,10 +102,14 @@ void myecho(char* arg) {
         throw(-1);
     }
     cout << arg << endl;
+
+    return;
+
 }
 
 void mypause() {
     string waittill;
+    cout << "Press any key to continue.";
     while(cin.get() != '\n') {
         return;
     }
@@ -128,6 +125,7 @@ void myquit() {
 
 void help() {
     cout << "print help pages?" << endl;
+    return;
 }
 
 
@@ -144,4 +142,17 @@ void printStatus() {
     char usernameBuffer[50];
     getUsername(usernameBuffer);
     cout << usernameBuffer << ":~ "<< pathBuffer << ">";
+    
+    return;
+
 }
+
+
+
+/*
+    4 built in commands need to support output redirection > and >>.
+    dir
+    environ
+    echo
+    help
+*/

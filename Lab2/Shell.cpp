@@ -4,7 +4,6 @@
 int main(int argc, char* argv[]) {
     
     clr();
-    printStatus();
 
     string rawCommand;
 
@@ -37,31 +36,13 @@ int main(int argc, char* argv[]) {
     }
     
     else { 
+
+        printStatus();
         
 
         while(getline(cin, rawCommand)) {
 
             parseInput(rawCommand);
-
-            /*
-            for(int i = 0; i < parsed_input.size; i++) {
-                if(getBackgroundExecution()) {
-                    processBackgroundExecution()
-                }
-                else {
-                    if(getPipe()) {
-                        processPipe()
-                    }
-                    if(getRedirect()) {
-                        processRedirect()
-                    }
-                }
-                
-            }
-            */
-            
-            
-
 
         }
         
