@@ -1,9 +1,13 @@
 #include "Shell.h"
 #include <fstream>
 
+vector<char*> paths;
+
 int main(int argc, char* argv[]) {
     
     clr();
+
+    setEnvironPaths();
 
     string rawCommand;
 
@@ -54,4 +58,20 @@ int main(int argc, char* argv[]) {
 
 void getUsername(char* username) {
     getlogin_r(username, 50);
+}
+
+void setEnvironPaths() {
+    char* envPath = getenv("PATH");
+    char* path = strtok(envPath, ":");
+
+    while(strcmp(path, ".") != 0) {
+        paths.push_back(path);
+        path = strtok(NULL, ":");
+    }
+
+    return;
+}
+
+vector<char*> getEnvironPaths() {
+    return paths;
 }

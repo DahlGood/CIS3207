@@ -1,17 +1,16 @@
+
 #include "Shell.h"
 
 /*
     This parser ensures the user input will always be in the following order:
     |       0     |        1     |      2      | .... |      n      |
     | command arg | Bash Command | command arg | .... | command arg | 
-
     ex:
         {
             {ls, NULL},        <----- 0, command
             {|, NULL},         <----- 1, bash command
             {grep, item, NULL} <----- 2, command arg
         }
-
     This allows us to easily account for multiple redirections or pipes in the future.
 */
 

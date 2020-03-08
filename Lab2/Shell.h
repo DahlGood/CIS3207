@@ -15,6 +15,7 @@ void parseInput(string rawCommand);
 bool containsBashCommand(char* command_token);
 void addBashCommand(char* command, vector<char*> *bashCommandsIncluded);
 vector<char*> getBashCommand();
+bool validCommand(char* command);
 
 //Command Processor
 void processCommand(vector<vector<char*> * > parsed_input);
@@ -29,6 +30,8 @@ void processExternal(vector<vector<char*> * > parsed_input);
 
 //Some helper commands defined in Shell.cpp
 void getUsername(char* username);
+void setEnvironPaths();
+vector<char*> getEnvironPaths();
 
 //Built In Commands.
 void cd(char* path);
@@ -40,6 +43,5 @@ void myecho(char* arg);
 void mypause();
 void myquit();
 void help();
-
-void printStatus();
+void printStatus(); //maybe move this to another file, like Shell.cpp
 
