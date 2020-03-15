@@ -32,6 +32,7 @@ int main(int argc, char* argv[]) {
             catch(int error)
             {   
                 cout << "Error: All commands must start with a command." << endl;
+                
             }
 
         }

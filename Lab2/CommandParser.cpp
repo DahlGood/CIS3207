@@ -38,7 +38,7 @@ void parseInput(string rawCommand) {
     //Check to make sure the first argument of user input isnt an illegal character.
     if(containsBashCommand(command_token)) {
         //Might need to include an else.
-        throw(0);
+        return;
     }
 
     //If everything has gone fine so far, add the first element to the vector.
@@ -97,6 +97,7 @@ void parseInput(string rawCommand) {
     parsed_input.clear();
     bashCommandsIncluded.clear();
 
+    return;
 
 }
 

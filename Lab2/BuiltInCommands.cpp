@@ -129,7 +129,7 @@ void myquit() {
 
 void help() {
     cout << "cd - takes you to a directory. Ex: cd Directory/Directory2" << endl;
-    cout << "clr - clears the current screen." << endl;
+    cout << "clr - clears the current screen. Ex: clr " << endl;
     cout << "dir - prints content of a directory. Ex: dir, dir Directory/Directory2" << endl;
     cout << "environ - prints helpful environment variables" << endl;
     cout << "echo - takes at least one argument. Ex: echo Hi, echo Hello World" << endl;
@@ -146,7 +146,7 @@ void help(char* command) {
                 cout << "cd - takes you to a directory. Ex: cd Directory/Directory2" << endl;
                 break;
             case 1:
-                cout << "clr - clears the current screen." << endl;
+                cout << "clr - clears the current screen. Ex: clr" << endl;
                 break;
             case 2:
                 cout << "dir - prints content of a directory. Ex: dir, dir Directory/Directory2" << endl;

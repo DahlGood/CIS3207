@@ -110,19 +110,32 @@ void builtInRedirection(vector<char*> bashCommandsIncluded, vector<vector<char*>
         return;
     }
 
+    if(file == -1) {
+        close(file);
+        cout << "Error: Couldn't open " << parsed_input.at(2)->at(0) << endl;
+        return;
+    }
+
     //Make file look like stdout.
     //Saving stdout.
     int stdout_saved = dup(STDOUT_FILENO);
+    if(stdout_saved == -1) {
+        cout << "Error: Problem saving stdout file discriptor." << endl;
+    }
     
     //Making the file look like stdout.
-    dup2(file, STDOUT_FILENO);
+    if(dup2(file, STDOUT_FILENO) == -1) {
+        cout << "Error: Problem duping file to stdout." << endl;
+    }
     close(file);
 
     //Running the command.
     processBuiltIn(parsed_input);
 
     //Restoring the original file descriptor so the program can continue normally.
-    dup2(stdout_saved, STDOUT_FILENO);
+    if(dup2(stdout_saved, STDOUT_FILENO) == -1) {
+        cout << "Error: Problem restoring stdout." << endl;
+    }
     close(stdout_saved);
     
     return;
@@ -195,20 +208,37 @@ void externalRedirection(vector<char*> bashCommandsIncluded, vector<vector<char*
             cout << "Error: Check your input for possible mistakes. Expected input should look like: command < fileOne > fileTwo." << endl;
         }
 
+        if(fileOne == -1) {
+            close(fileOne);
+            close(fileTwo);
+            cout << "Error: Couldn't open " << parsed_input.at(2)->at(0) << endl;
+            return;
+        }
+
         //Saving the file descriptors.
         int stdin_saved = dup(STDIN_FILENO);
         int stdout_saved = dup(STDOUT_FILENO);
 
+        if(stdin_saved == -1 || stdout_saved == -1) {
+            cout << "Error: Problem restoring stdin or stdout." << endl;
+            return;
+        }
+
         //Setting the appropriate file descriptors.
         //Making fileOne look like stdin.
-        dup2(fileOne, STDIN_FILENO);
+        int fileOneDup2 = dup2(fileOne, STDIN_FILENO);
         //Making fileTwo look like stdout.
-        dup2(fileTwo, STDOUT_FILENO);
+        int fileTwoDup2 = dup2(fileTwo, STDOUT_FILENO);
+
+        if(fileOneDup2 == -1 || fileTwoDup2 == -1) {
+            cout << "Problem duping fileOne or fileTwo" << endl;
+            return;
+        }
 
         //Executing the commands requested.
         pid_t process = fork();
         if(process == -1) {
-            cout << "Error: problem creaing process." << endl;
+            cout << "Error: Problem creating process." << endl;
         }
         if(process == 0) {
             close(fileOne);
@@ -219,14 +249,21 @@ void externalRedirection(vector<char*> bashCommandsIncluded, vector<vector<char*
             }
         }
         else {
-            //Restoring file descriptors
-            dup2(stdin_saved, STDIN_FILENO);
-            dup2(stdout_saved, STDOUT_FILENO);
-            close(stdin_saved);
-            close(stdout_saved);
 
             //Waiting till ANY child from its process group has finished.
             waitpid(-1, NULL, 0);
+
+            //Restoring file descriptors
+            int restoredstdin = dup2(stdin_saved, STDIN_FILENO);
+            int restoredstdout = dup2(stdout_saved, STDOUT_FILENO);
+
+            if(restoredstdin == -1 || restoredstdout == -1) {
+                cout << "Problem restoring stdin or stdout." << endl;
+                return;
+            }
+
+            close(stdin_saved);
+            close(stdout_saved);
         }
 
     }
@@ -236,21 +273,41 @@ void externalRedirection(vector<char*> bashCommandsIncluded, vector<vector<char*
         int stdin_saved = dup(STDIN_FILENO);
         int stdout_saved = dup(STDOUT_FILENO);
 
+        if(stdin_saved == -1 || stdout_saved == -1) {
+            cout << "Problem saving stdin or stdout." << endl;
+            return;
+        }
+
         //Setting the appropriate file descriptors.
         if(strcmp(bashCommandsIncluded.at(0), "<") == 0) {
             fileOne = open(parsed_input.at(2)->at(0), O_RDONLY, S_IRUSR | S_IRGRP);
-            //Making fileOne look like stdin.
-            dup2(fileOne, STDIN_FILENO);
+            if(fileOne == -1) {
+                close(fileOne);
+                cout << "Error: Couldn't open " << parsed_input.at(2)->at(0) << endl;
+                return;
+            }
+            else {
+                //Making fileOne look like stdin.
+                if(dup2(fileOne, STDIN_FILENO) == -1) {
+                    cout << "Error: Problem making fileOne look like stdin." << endl;
+                }
+            }
         }
         else if(strcmp(bashCommandsIncluded.at(0), ">") == 0) {
             fileOne = open(parsed_input.at(2)->at(0), O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
             //Making fileTwo look like stdout.
-            dup2(fileOne, STDOUT_FILENO);
+            if(dup2(fileOne, STDOUT_FILENO) == -1) {
+                cout << "Error: Problem making fileOne look like stdout." << endl;
+                return;
+            }
         }
         else if(strcmp(bashCommandsIncluded.at(0), ">>") == 0) {
             fileOne = open(parsed_input.at(2)->at(0), O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
-            //Making fileOne look like stdout.
-            dup2(fileOne, STDOUT_FILENO);
+            //Making fileOne look like stdout. 
+            if(dup2(fileOne, STDOUT_FILENO) == -1) {
+                cout << "Error: Problem making fileOne look like stdout." << endl;
+                return;
+            }
         }
         else {
             cout << "Error: Check your input for possible mistakes. Expected input should look like: command < fileOne  OR command > fileOne." << endl;
@@ -268,19 +325,25 @@ void externalRedirection(vector<char*> bashCommandsIncluded, vector<vector<char*
             }
         }
         else {
-            //Restoring file descriptors
-            dup2(stdin_saved, STDIN_FILENO);
-            dup2(stdout_saved, STDOUT_FILENO);
-            close(stdin_saved);
-            close(stdout_saved);
 
             //Waiting till ANY child from its process group has finished.
             waitpid(-1, NULL, 0);
+
+            
+            //Restoring file descriptors
+            int savedstdin = dup2(stdin_saved, STDIN_FILENO);
+            int savedstdout = dup2(stdout_saved, STDOUT_FILENO);
+
+            if(savedstdin == -1 || savedstdout == -1) {
+                cout << "Error: Problem restoring stdin or stdout." << endl;
+                return;
+            }
+            close(stdin_saved);
+            close(stdout_saved);
+
         }
 
     }
-
-
     
 }
 
@@ -306,7 +369,10 @@ void externalPiping(vector<vector<char*> * > parsed_input) {
         close(fd[0]);
 
         //Making the pipes stdout look like stdout.
-        dup2(fd[1], STDOUT_FILENO);
+        if(dup2(fd[1], STDOUT_FILENO) == -1) {
+            cout << "Error: Problem making pipe stdout look like stdout." << endl;
+            return;
+        }
         close(fd[1]);
 
         //Executing the command requested.
@@ -327,7 +393,10 @@ void externalPiping(vector<vector<char*> * > parsed_input) {
         //Closing the pipes stdout.
         close(fd[1]);
         //Making the pipes stdin look like stdin.
-        dup2(fd[0], STDIN_FILENO);
+        if(dup2(fd[0], STDIN_FILENO) == -1) {
+            cout << "Error: Problem making pipe stdin look like stdin" << endl;
+            return;
+        }
         close(fd[0]);
 
         if(execvp(execTwo[0], execTwo) == -1) {

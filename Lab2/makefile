@@ -3,7 +3,7 @@ CC = g++
 
 #Compiler flags
 #compiling with -std=c++11 because enhanced for loops arent available in the default c++98 compiler
-FLAGS = -Wall -Werror -std=c++11
+FLAGS = -std=c++11 -Wall -Werror
 
 FILES = Shell.cpp BuiltInCommands.cpp CommandParser.cpp CommandProcessor.cpp
 
