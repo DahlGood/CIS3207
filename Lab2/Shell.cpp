@@ -5,12 +5,12 @@ vector<char*> paths;
 
 int main(int argc, char* argv[]) {
     
+    //Clears screen.
     clr();
 
-    setEnvironPaths();
-
     string rawCommand;
-
+    
+    //If a batch file is entered 
     if(argc > 1) {
         //open file specified in argv
         ifstream io;
@@ -18,60 +18,40 @@ int main(int argc, char* argv[]) {
         if(!io.is_open()) {
             cout << "Couldnt open the batch file specified." << endl;
         }
-
+        //While there is still content in the file (aka we havent reached the end) continue.
         while(io.good()) {
-
+            //Grabs content from the file line by line.
             getline(io, rawCommand);
-
+            
+            //Just some error handling.
             try
             {
+                //Parse that line as a command string.
                 parseInput(rawCommand);
             }
             catch(int error)
-            {
+            {   
                 cout << "Error: All commands must start with a command." << endl;
             }
-            
-            
 
         }
-        
-
     }
     
-    else { 
-
+    //If no batch command was specified, read and process from user input.
+    else {
+        //Making things look pretty.
         printStatus();
-        
-
+        //Getting user input.
         while(getline(cin, rawCommand)) {
-
             parseInput(rawCommand);
-
+            printStatus();
         }
-        
-
     }
     
    return 0;
 }
 
+//Mainly just to make things look good.
 void getUsername(char* username) {
     getlogin_r(username, 50);
-}
-
-void setEnvironPaths() {
-    char* envPath = getenv("PATH");
-    char* path = strtok(envPath, ":");
-
-    while(strcmp(path, ".") != 0) {
-        paths.push_back(path);
-        path = strtok(NULL, ":");
-    }
-
-    return;
-}
-
-vector<char*> getEnvironPaths() {
-    return paths;
 }

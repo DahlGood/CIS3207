@@ -97,11 +97,17 @@ void myenviron() {
 }
 
 
-void myecho(char* arg) {
-    if(arg == NULL) {
+void myecho(vector<char *> cmdGrpOne) {
+    if(cmdGrpOne.size() < 2) {
         throw(-1);
     }
-    cout << arg << endl;
+    for(unsigned int i = 1; i < cmdGrpOne.size(); i++) {
+        if(cmdGrpOne.at(i) == NULL) {
+            cout << endl;
+            return;
+        }
+        cout << cmdGrpOne.at(i) << " ";
+    }
 
     return;
 
@@ -117,19 +123,57 @@ void mypause() {
 }
 
 void myquit() {
-
     exit(0);
-
 }
 
 
 void help() {
-    cout << "print help pages?" << endl;
+    cout << "cd - takes you to a directory. Ex: cd Directory/Directory2" << endl;
+    cout << "clr - clears the current screen." << endl;
+    cout << "dir - prints content of a directory. Ex: dir, dir Directory/Directory2" << endl;
+    cout << "environ - prints helpful environment variables" << endl;
+    cout << "echo - takes at least one argument. Ex: echo Hi, echo Hello World" << endl;
+    cout << "pause - waits for a user to continue. Ex: pause" << endl;
+    cout << "quit - exits the shell. Ex: quit" << endl;
+    cout << "help - prints all the built in commands and their uses. Ex: help" << endl;
     return;
 }
 
-
-
+void help(char* command) {
+    
+    switch (isBuiltIn(command)) {
+            case 0:
+                cout << "cd - takes you to a directory. Ex: cd Directory/Directory2" << endl;
+                break;
+            case 1:
+                cout << "clr - clears the current screen." << endl;
+                break;
+            case 2:
+                cout << "dir - prints content of a directory. Ex: dir, dir Directory/Directory2" << endl;
+                break;
+            case 3:
+                cout << "environ - prints helpful environment variables" << endl;
+                break;
+            case 4:
+                cout << "echo - takes at least one argument. Ex: echo Hi, echo Hello World" << endl;
+                break;
+            case 5:
+                cout << "pause - waits for a user to continue. Ex: pause" << endl;
+                break;
+            case 6:
+                cout << "quit - exits the shell. Ex: quit" << endl;
+                break;
+            case 7:
+                cout << "help - prints a specific built in command or all built in commands and how to use them. Ex: help, help echo" << endl;
+                break;
+            default:
+                cout << "Sorry " << command << " is not a built in command." << endl;
+                break;
+        }
+        
+    
+    return;
+}
 
 void printStatus() {
     //max size of the current directory.
@@ -146,13 +190,3 @@ void printStatus() {
     return;
 
 }
-
-
-
-/*
-    4 built in commands need to support output redirection > and >>.
-    dir
-    environ
-    echo
-    help
-*/

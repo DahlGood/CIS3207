@@ -6,21 +6,17 @@
 
 using namespace std;
 
-enum error_codes {
-    INVALID_COMMAND = 0,
-};
-
 //Command Parser
 void parseInput(string rawCommand);
 bool containsBashCommand(char* command_token);
 void addBashCommand(char* command, vector<char*> *bashCommandsIncluded);
 vector<char*> getBashCommand();
-bool validCommand(char* command);
 
 //Command Processor
 void processCommand(vector<vector<char*> * > parsed_input);
 int isBuiltIn(string command);
 void chooseDir(char* argument);
+void chooseHelp(char* argument);
 void builtInRedirection(vector<char*> bashCommandsIncluded, vector<vector<char*> * > parsed_input);
 void processBuiltIn(vector<vector<char*> * > parsed_input);
 void externalRedirection(vector<char*> bashCommandsIncluded, vector<vector<char*> * > parsed_input);
@@ -30,8 +26,6 @@ void processExternal(vector<vector<char*> * > parsed_input);
 
 //Some helper commands defined in Shell.cpp
 void getUsername(char* username);
-void setEnvironPaths();
-vector<char*> getEnvironPaths();
 
 //Built In Commands.
 void cd(char* path);
@@ -39,9 +33,10 @@ void clr();
 void dir();
 void dir(char* path);
 void myenviron();
-void myecho(char* arg);
+void myecho(vector<char *> cmdGrpOne);
 void mypause();
 void myquit();
 void help();
-void printStatus(); //maybe move this to another file, like Shell.cpp
+void help(char* command);
 
+void printStatus();

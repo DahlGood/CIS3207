@@ -7,12 +7,23 @@
 //Needed for piping
 #include <sys/wait.h>
 
+
 void processCommand(vector<vector<char*> * > parsed_input) {
+    //If the command is a built in but we want to use piping we should just use the external version of the command. For example echo.
+    //So to do this, Check if the bash command vecotor has content in it. If it does then check if it's a pipe. If it is, go straight to piping. Otherwise continue like normal.
+    if(getBashCommand().size() > 0) {
+        if(strcmp(getBashCommand().at(0), "|") == 0) {
+            externalPiping(parsed_input);
+            return;
+        }
+    }
     
-    //Since we're only worrying about single redirection / pipes for the most part, we only have to check the first command.
+    //Since we're only worrying about single redirection / pipes for the most part (except in the case mentioned above), we only have to check the first command.
+    //Using the vector index position returned by isBuiltIn to check if the command is a built in command.
     int position = isBuiltIn(parsed_input.at(0)->at(0));
     
     //Internal commands
+    //If its a built in command (aka if the vector index returned is less than the total size of the vector) then process the command as a built in.
     if(position < 8) {
         //If a bash command was entered.
         if(getBashCommand().size() != 0) {
@@ -20,9 +31,11 @@ void processCommand(vector<vector<char*> * > parsed_input) {
             builtInRedirection(getBashCommand(), parsed_input);
         }
         else {
+            //Process the command as a built in.
             processBuiltIn(parsed_input);
         }
     }
+
     //External Commands
     else {
         //Are bash commands used.
@@ -42,22 +55,23 @@ void processCommand(vector<vector<char*> * > parsed_input) {
             processExternal(parsed_input);
         }
     }
+    
 
 }
 
 int isBuiltIn(string command) {
-    vector<string> built_ins{"cd", "clr", "dir", "environ", "echo", "pause", "quit", "help"};
-    
-    unsigned int position = find(built_ins.begin(), built_ins.end(), command) - built_ins.begin();
 
-    if(position <= (unsigned)built_ins.size()) {
-        return position;
-    }
+    //Vector of all built in commands.
+    vector<string> built_ins{"cd", "clr", "dir", "environ", "echo", "pause", "quit", "help"};
+
+    //Vector index if found, size of vector if not.
+    unsigned int position = find(built_ins.begin(), built_ins.end(), command) - built_ins.begin();
     
-    return -1;
+    return position;
 
 }
 
+//There are two options for the dir command. dir and dir Directory. This determines what one to use.
 void chooseDir(char* argument) {
     if(argument != NULL) {
         dir(argument);
@@ -67,12 +81,24 @@ void chooseDir(char* argument) {
     }
 }
 
+//There are two options for the help command. help and help Command. This determines what one to use.
+void chooseHelp(char* argument) {
+    if(argument != NULL) {
+        help(argument);
+    }
+    else {
+        help();
+    }
+}
+
 
 //Project specifications say this only needs to handle output redirection and only for 4 built in commands.
 void builtInRedirection(vector<char*> bashCommandsIncluded, vector<vector<char*> * > parsed_input) {
-
+    
+    //Declaring a file descriptior.
     int file;
 
+    //Determining how to open the file depending on the bach command used.
     if(strcmp(bashCommandsIncluded.at(0), ">") == 0) {
         file = open(parsed_input.at(2)->at(0), O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
     }
@@ -87,16 +113,23 @@ void builtInRedirection(vector<char*> bashCommandsIncluded, vector<vector<char*>
     //Make file look like stdout.
     //Saving stdout.
     int stdout_saved = dup(STDOUT_FILENO);
+    
+    //Making the file look like stdout.
     dup2(file, STDOUT_FILENO);
     close(file);
+
+    //Running the command.
     processBuiltIn(parsed_input);
+
+    //Restoring the original file descriptor so the program can continue normally.
     dup2(stdout_saved, STDOUT_FILENO);
     close(stdout_saved);
-    //dup2(STDOUT_FILENO, file);
+    
     return;
 
 }
 
+//Uses the vector index returned to choose what command to run.
 void processBuiltIn(vector<vector<char*> * > parsed_input) {
 
     switch (isBuiltIn(parsed_input.at(0)->at(0))) {
@@ -115,7 +148,7 @@ void processBuiltIn(vector<vector<char*> * > parsed_input) {
             case 4:
                 try
                 {
-                    myecho(parsed_input.at(0)->at(1));
+                    myecho(*parsed_input.at(0));
                 }
                 catch(int x)
                 {
@@ -129,7 +162,7 @@ void processBuiltIn(vector<vector<char*> * > parsed_input) {
                 myquit();
                 break;
             case 7:
-                help();
+                chooseHelp(parsed_input.at(0)->at(1));
                 break;
             default:
                 cout << "Default" << endl;
@@ -141,15 +174,14 @@ void processBuiltIn(vector<vector<char*> * > parsed_input) {
 
 void externalRedirection(vector<char*> bashCommandsIncluded, vector<vector<char*> * > parsed_input) {
     
-    if(!validCommand(parsed_input.at(0)->at(0))) {
-        return;
-    }
+    //Converts the vector command group to an array. Needed to run exec.
+    char** execProcess = parsed_input.at(0)->data();
     
-
-    char** command = parsed_input.at(0)->data();
+    //Declaring file descriptors.
     int fileOne;
     int fileTwo;
 
+    //Determining how to open the files depending on the bach command(s) used.
     if(bashCommandsIncluded.size() == 2) {
         if(strcmp(bashCommandsIncluded.at(1), ">") == 0) {
             fileOne = open(parsed_input.at(2)->at(0), O_RDONLY, S_IRUSR | S_IRGRP);
@@ -163,12 +195,17 @@ void externalRedirection(vector<char*> bashCommandsIncluded, vector<vector<char*
             cout << "Error: Check your input for possible mistakes. Expected input should look like: command < fileOne > fileTwo." << endl;
         }
 
+        //Saving the file descriptors.
         int stdin_saved = dup(STDIN_FILENO);
         int stdout_saved = dup(STDOUT_FILENO);
 
+        //Setting the appropriate file descriptors.
+        //Making fileOne look like stdin.
         dup2(fileOne, STDIN_FILENO);
+        //Making fileTwo look like stdout.
         dup2(fileTwo, STDOUT_FILENO);
 
+        //Executing the commands requested.
         pid_t process = fork();
         if(process == -1) {
             cout << "Error: problem creaing process." << endl;
@@ -176,32 +213,43 @@ void externalRedirection(vector<char*> bashCommandsIncluded, vector<vector<char*
         if(process == 0) {
             close(fileOne);
             close(fileTwo);
-            execvp(command[0], command);
+            
+            if(execvp(execProcess[0], execProcess) == -1) {
+                cout << "Error: Problem executing " << parsed_input.at(0)->at(0) << endl;
+            }
         }
         else {
+            //Restoring file descriptors
             dup2(stdin_saved, STDIN_FILENO);
             dup2(stdout_saved, STDOUT_FILENO);
             close(stdin_saved);
             close(stdout_saved);
+
+            //Waiting till ANY child from its process group has finished.
             waitpid(-1, NULL, 0);
         }
 
     }
     else {
 
+        //Saving file descriptors.
         int stdin_saved = dup(STDIN_FILENO);
         int stdout_saved = dup(STDOUT_FILENO);
 
+        //Setting the appropriate file descriptors.
         if(strcmp(bashCommandsIncluded.at(0), "<") == 0) {
             fileOne = open(parsed_input.at(2)->at(0), O_RDONLY, S_IRUSR | S_IRGRP);
+            //Making fileOne look like stdin.
             dup2(fileOne, STDIN_FILENO);
         }
         else if(strcmp(bashCommandsIncluded.at(0), ">") == 0) {
             fileOne = open(parsed_input.at(2)->at(0), O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+            //Making fileTwo look like stdout.
             dup2(fileOne, STDOUT_FILENO);
         }
         else if(strcmp(bashCommandsIncluded.at(0), ">>") == 0) {
             fileOne = open(parsed_input.at(2)->at(0), O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
+            //Making fileOne look like stdout.
             dup2(fileOne, STDOUT_FILENO);
         }
         else {
@@ -214,14 +262,19 @@ void externalRedirection(vector<char*> bashCommandsIncluded, vector<vector<char*
             cout << "Error: problem creaing process." << endl;
         }
         if(process == 0) {
-            close(fileOne);
-            execvp(command[0], command);
+            close(fileOne); 
+            if(execvp(execProcess[0], execProcess) == -1) {
+                cout << "Error: Problem executing " << parsed_input.at(2)->at(0) << endl;
+            }
         }
         else {
+            //Restoring file descriptors
             dup2(stdin_saved, STDIN_FILENO);
             dup2(stdout_saved, STDOUT_FILENO);
             close(stdin_saved);
             close(stdout_saved);
+
+            //Waiting till ANY child from its process group has finished.
             waitpid(-1, NULL, 0);
         }
 
@@ -233,34 +286,37 @@ void externalRedirection(vector<char*> bashCommandsIncluded, vector<vector<char*
 
 void externalPiping(vector<vector<char*> * > parsed_input) {
     
-    if(!validCommand(parsed_input.at(0)->at(0))) {
-        return;
-    }
-    else if(!validCommand(parsed_input.at(2)->at(0))) {
-        return;
-    }
-    
-    
-    char** commandOne = parsed_input.at(0)->data();
-    char** commandTwo = parsed_input.at(2)->data();
+    //Converts the vector command group to an array. Needed to run exec.
+    char** execOne = parsed_input.at(0)->data();
+    char** execTwo = parsed_input.at(2)->data();
 
+    //Creating a pipe.
     int fd[2];
     if(pipe(fd) != 0) {
         cout << "Error: Couldn't create pipe." << endl;
     }
 
+    //Executing the commands requested.
     pid_t processOne = fork();
     if(processOne == -1) {
         cout << "Error: Couldn't create process one." << endl;
     }
     else if(processOne == 0) {
+        //Closing the pipes stdin
         close(fd[0]);
+
+        //Making the pipes stdout look like stdout.
         dup2(fd[1], STDOUT_FILENO);
         close(fd[1]);
-        execvp(commandOne[0], commandOne);
+
+        //Executing the command requested.
+        if(execvp(execOne[0], execOne) == -1) {
+            cout << "Error: Problem executing " << parsed_input.at(0)->at(0) << endl;
+        }
     }
     else {
-        waitpid(0, NULL, 0);
+        //Waiting till ANY child from its process group has finished.
+        waitpid(-1, NULL, 0);
     }
 
     pid_t processTwo = fork();
@@ -268,51 +324,49 @@ void externalPiping(vector<vector<char*> * > parsed_input) {
         cout << "Error: Couldn't create process two." << endl;
     }
     else if(processTwo == 0) {
+        //Closing the pipes stdout.
         close(fd[1]);
+        //Making the pipes stdin look like stdin.
         dup2(fd[0], STDIN_FILENO);
         close(fd[0]);
-        execvp(commandTwo[0], commandTwo);
+
+        if(execvp(execTwo[0], execTwo) == -1) {
+            cout << "Error: Problem executing " << parsed_input.at(2)->at(0) << endl;
+        }
     }
     else {
-        //Wait until this specific process is finished.
-        waitpid(2, NULL, 0);
-    }
+        //Closing the pipe
+        close(fd[0]);
+        close(fd[1]);
 
-    close(fd[0]);
-    close(fd[1]);
+        //Waiting till ANY child from its process group has finished.
+        waitpid(-1, NULL, 0);
+    }
 
     return;
 
 }
 
 void externalBE(vector<vector<char*> * > parsed_input) {
-    
-    if(!validCommand(parsed_input.at(0)->at(0))) {
-        return;
-    }
-    else if(!validCommand(parsed_input.at(2)->at(0))) {
-        return;
-    }
-    
 
-    char** commandOne = parsed_input.at(0)->data();
-    char** commandTwo = parsed_input.at(2)->data();
+    //Converts the vector command group to an array. Needed to run exec.
+    char** execOne = parsed_input.at(0)->data();
+    char** execTwo = parsed_input.at(2)->data();
 
-    //int fd[2];
-    //pipe(fd);
-
+    //Executing the commands requested.
     pid_t processOne = fork();
     if(processOne == -1) {
         cout << "Error: Couldn't create process one." << endl;
     }
     else if(processOne == 0) {
-        
-        execvp(commandOne[0], commandOne);
+        if(execvp(execOne[0], execOne) == -1) {
+            cout << "Error: Problem executing " << parsed_input.at(0)->at(0) << endl;
+        }
     }
     else {
-        //close(fd[0]);
-        //dup2(fd[1], STDIN_FILENO);
-        //waitpid(-1, NULL, 0);
+
+        //Waiting till ANY child from its process group has finished.
+        waitpid(-1, NULL, 0);
     }
 
     pid_t processTwo = fork();
@@ -320,9 +374,13 @@ void externalBE(vector<vector<char*> * > parsed_input) {
         cout << "Error: Couldn't create process two." << endl;
     }
     else if(processTwo == 0) {
-        execvp(commandTwo[0], commandTwo);
+        if(execvp(execTwo[0], execTwo) == -1) {
+            cout << "Error: Problem executing " << parsed_input.at(2)->at(0) << endl;
+        }
     }
     else {
+
+        //Waiting till ANY child from its process group has finished.
         waitpid(-1, NULL, 0);
     }
 
@@ -331,49 +389,26 @@ void externalBE(vector<vector<char*> * > parsed_input) {
 }
 
 void processExternal(vector<vector<char*> * > parsed_input) {
-    
-    if(!validCommand(parsed_input.at(0)->at(0))) {
-        cout << "NOT VALID" << endl;
-        return;
-    }
-    cout << "made it here" << endl;
+    //Converts the vector command group to an array. Needed to run exec.
     char** command = parsed_input.at(0)->data();
     
+    //Executing the commands requested.
     pid_t process = fork();
     if(process == -1) {
-        cout << "Error: couldnt fork." << endl;
+        cout << "Error: Couldn't create process." << endl;
         return;
     }
     else if(process == 0) {
-        execvp(command[0], command);
+        
+        if(execvp(command[0], command) == -1) {
+            cout << "Error: Problem executing " << parsed_input.at(0)->at(0) << endl;
+        }
     }
     else {
+
+        //Waiting till ANY child from its process group has finished.
         waitpid(-1, NULL, 0);
     }
 
     return;
-}
-
-bool validCommand(char* command) {
-    bool valid = false;
-    for(auto x : getEnvironPaths()) {
-        string absoluteCommandPath = x;
-        absoluteCommandPath += "/";
-        absoluteCommandPath += command;
-        
-        if(access(absoluteCommandPath.c_str(), X_OK) == 0) {
-            cout << "Yes, because path variables." << endl;
-            valid = true;
-            return true;
-        }
-        else if(access(command, X_OK) == 0) {
-            cout << "Yes, because current dir." << endl;
-            valid = true;
-            return true;
-        }
-    }
-
-    cout << "Error " << command << " is not a valid command." << endl;
-
-    return valid;
 }
