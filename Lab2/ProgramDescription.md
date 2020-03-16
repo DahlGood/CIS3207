@@ -13,7 +13,7 @@ The program revolved centrally around a loop and a parser. There are two main wa
 If a batch file is selected the shell reads the file and parses the content line by line. If user input is selected (this is the default method if no batch file is specified) each line the user types is parsed.
 
 #### Parsing
-This process is the same regardless of how a command is acquired. Our goal in this step is to break everything into groups, the command group and the bash group. To do this we tokenize the raw user input by spaces. Then we check whether the command entered is a bash command and split the groups accordingly. The final format consist of a vector containing vectors. This format is as follows:
+This process is the same regardless of how a command is acquired. Our goal in this step is to break everything into groups, the command group and the bash group. To do this we tokenize the raw user input by spaces. Then we check whether the command entered is a bash command and split the groups accordingly. The final format consist of a vector containing vectors. This format is as follows:<br/>
 ![format](ParsedCommandFormat.png)
 
 
