@@ -1,0 +1,16 @@
+wc < nonexistentfile.txt
+echo Hello World &
+echo Hello World >
+echo Hello World >>
+echo Hello World |
+echo Hello World <
+| ls
+& ls
+< ls
+> ls
+>> ls
+notacommand
+not a command
+notacommand > file.txt
+notacommand | notacommand
+not a command & not a command

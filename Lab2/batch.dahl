@@ -1,0 +1,7 @@
+ls > output.txt
+ls >> output.txt
+wc < words.txt
+wc < input.txt > output.txt
+wc < input.txt >> output.txt
+echo Hello | wc -c
+vim & ls
