@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
         }
     }
     
-    //If no batch command was specified, read and process from user input.
+    //If no batch file was specified, read and process from user input.
     else {
         //Making things look pretty.
         printStatus();

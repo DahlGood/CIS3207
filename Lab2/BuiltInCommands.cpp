@@ -5,9 +5,6 @@
 
 void cd(char* path) {
 
-    //Skips to a new line.
-    //cout << endl;
-
     try
     {
         int returnedVal = chdir(path);

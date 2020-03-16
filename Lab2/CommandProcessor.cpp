@@ -9,11 +9,25 @@
 
 
 void processCommand(vector<vector<char*> * > parsed_input) {
+
+    if(getBashCommand().size() > 0 && parsed_input.size() < 3) {
+        cout << "Invalid command syntax" << endl;
+        return;
+    }
+
     //If the command is a built in but we want to use piping we should just use the external version of the command. For example echo.
     //So to do this, Check if the bash command vecotor has content in it. If it does then check if it's a pipe. If it is, go straight to piping. Otherwise continue like normal.
     if(getBashCommand().size() > 0) {
         if(strcmp(getBashCommand().at(0), "|") == 0) {
             externalPiping(parsed_input);
+            return;
+        }
+    }
+
+    if(getBashCommand().size() > 0) {
+        if(strcmp(getBashCommand().at(0), "&") == 0) {
+            cout << "here" << endl;
+            externalBE(parsed_input);
             return;
         }
     }

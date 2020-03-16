@@ -38,6 +38,7 @@ void parseInput(string rawCommand) {
     //Check to make sure the first argument of user input isnt an illegal character.
     if(containsBashCommand(command_token)) {
         //Might need to include an else.
+        cout << "True" << endl;
         return;
     }
 
@@ -45,7 +46,7 @@ void parseInput(string rawCommand) {
     parsed_input.push_back(new vector<char*>);
 
     
-    int i = 0;
+    unsigned int i = 0;
     while(command_token) {
         if(containsBashCommand(command_token)) {
             
@@ -88,6 +89,10 @@ void parseInput(string rawCommand) {
     }
 
     //Ensures the last command group will be NULL terminated.
+    if(parsed_input.size() <= i) {
+        cout << "Error: Argument must be passed after an operator." << endl;
+        return;
+    }
     parsed_input.at(i)->push_back(NULL);
 
     //Process the command.
