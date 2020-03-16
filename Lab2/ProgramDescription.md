@@ -25,4 +25,4 @@ This is the final and most involved step in the shells execution. The command pr
 Method of testing:
 * Brute force forbidden commands.
 
-What I did to test my shells ability to handle errors was fill a batch file with commands I know dont work. You can take a look at this garbage filles batch [here](trash.dahl)
+What I did to test my shells ability to handle errors was fill a batch file with commands I know dont work. You can take a look at this garbage files batch [here](trash.dahl)
