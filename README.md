@@ -1,6 +1,6 @@
 # CIS3207 Labs
 
-## Lab0
+## Lab0 - Utilities
 ### Linux Utilities
 #### Simple recreation of linux utilies
 cat, grep, zip, unzip
