@@ -13,7 +13,7 @@ Simulated CPU, Disks, and Network.
 ## [Lab2 - Shell](Lab2/)
 ###  Based on Ritchie and Thompson's UNIX Shell Implementation
 #### Simple Shell implementation that handles bash commands
-Handles bash commands <, >, >>, |, & on various built-in commands and all external commands present on the system.
+Handles bash commands <, >, >>, |, & on various built-in funtions and all external programs present on the system.
 
 ## [Lab3 - Multi-Threaded Network Spell Checker](Lab3/)
 ### Lorem ipsum dolor sit amet, consectetur adipiscing elit.
