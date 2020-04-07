@@ -71,9 +71,6 @@ int main(int argv, char* argc[]) {
     //loadDictionary(dictionaryName, &dictionarySet);
     loadDictionary(dictionaryName, &(dependencies->dictionary));
 
-    //Create a pool of threads.
-    spawnThreads(dependencies);
-
     //Socket descriptors operate like file descriptors.
     int socket_descriptor;
     int new_socket;
@@ -121,6 +118,9 @@ int main(int argv, char* argc[]) {
 
     //Prevents server crashing when client exits abruptly.
     signal(SIGPIPE, SIG_IGN);
+
+    //Create a pool of threads.
+    spawnThreads(dependencies);
     
     //Loop to accept socket connections.
     while(true) {
@@ -135,10 +135,22 @@ int main(int argv, char* argc[]) {
         //pthread_cond_signal(&connection_used);
 
         puts("Connection accepted");
+
+        pthread_mutex_lock(&connection_security);
         
         //Add this new connection to the socket queue. It looks like this whole process should be protected. For example we dont want the data of new socket to be overwritten before it can be added to the connection queue.
         dependencies->connections.slide(new_socket);
+        cout << "Connections size = " << dependencies->connections.size() << endl;
+        
+        //If there is a connection waiting to be processed unlock connection security and let it sleep. (This should always be true.)
+        if(dependencies->connections.size() > 0) {
+            //Since there is now a conection ready to be processed wake up the worker thread.
+            pthread_cond_signal(&connection_free);
+            pthread_cond_wait(&connection_used, &connection_security);
+        }
 
+
+        pthread_mutex_unlock(&connection_security);
 
     }
 
@@ -151,9 +163,9 @@ int main(int argv, char* argc[]) {
 
 void spawnThreads(SpellCheckDependencies *dependencies) {
     
-    //pthread_mutex_init(&connection_security, NULL);
-    //pthread_cond_init(&connection_used, NULL);
-    //pthread_cond_init(&connection_free, NULL);
+    pthread_mutex_init(&connection_security, NULL);
+    pthread_cond_init(&connection_used, NULL);
+    pthread_cond_init(&connection_free, NULL);
 
     //pthread_mutex_init(&log_security, NULL);
     //pthread_cond_init(&log_used, NULL);
@@ -177,23 +189,51 @@ void spawnThreads(SpellCheckDependencies *dependencies) {
 
 
 void *worker(void *dependencies) {
-
+    
+    pid_t pid = syscall(__NR_gettid);
     while(true) {
 
-        //pthread_mutex_lock(&connection_security);
+        // if(((SpellCheckDependencies *)dependencies)->connections.size() == 0) {
+        //     cout << "PID = " << pid << endl;
+        //     cout << "Waiting on condition variable. (waiting for connection size to be 0)" << endl;
+        //     pthread_cond_wait(&connection_used, &connection_security);
+        // }
+        // else {
+        //     cout << "Signaling condition variable. (Telling other threads they can start)" << endl;
+        //     //pthread_cond_signal(&connection_used);
+        // }
 
-        if(((SpellCheckDependencies *)dependencies)->connections.size() > 0) {
-            //pthread_cond_wait(&connection_used, &connection_security);
-        }
+        //NOTE: Everything works if we just do mutex lock and unlock around the connections snatch
+        cout << "PID = " << pid << endl;
+        cout << "Connections Size in Worker = " << ((SpellCheckDependencies *)dependencies)->connections.size() << endl;
 
+        pthread_mutex_lock(&connection_security);
+
+        //If there are no connections waiting, unlock the thread and put it to sleep.
+        //if(((SpellCheckDependencies *)dependencies)->connections.size() == 0) {
+            pthread_cond_wait(&connection_free, &connection_security);
+            pthread_cond_signal(&connection_used);
+        //}
 
         while(! (((SpellCheckDependencies *)dependencies)->connections.size() <= 0)) {
+            
             int socketD = ((SpellCheckDependencies *)dependencies)->connections.snatch();
+            
+
+            if(socketD > 0) {
+                //pthread_cond_signal(&connection_used);
+            }
+            cout << "SocketID in Worker = " << socketD << endl;
             clientServicer(socketD, ((SpellCheckDependencies *)dependencies));
             //close socket
+            
         }
 
-        //pthread_mutex_unlock(&connection_security);
+        pthread_mutex_unlock(&connection_security);
+        
+        cout << "should be here" << endl;
+
+        
     }
 
     
@@ -241,7 +281,9 @@ void *logger(void *dependencies) {
 
 
 void clientServicer(int socket, SpellCheckDependencies *dependencies) {
+        cout << "In client servicer" << endl;
 
+        pthread_mutex_unlock(&connection_security);
         //We've successfully arrived here with a socket, so alert the mutex that it can allow more to be accepted.
         //pthread_cond_signal(&connection_free);
         
@@ -260,12 +302,24 @@ void clientServicer(int socket, SpellCheckDependencies *dependencies) {
 
             //pthread_mutex_lock(&log_security);
             
-            int readResult = read(socket, &word2, sizeof(word2));
-                if(readResult == -1) {
-                cout << "Couldnt read from socket." << endl;
+            // int readResult = read(socket, &word2, sizeof(word2));
+            //     if(readResult == -1) {
+            //     cout << "Couldnt read from socket." << endl;
+            //     return;
+            // }
+
+            
+
+
+            int returnVal = recv(socket, &word2, strlen(word2), 0);
+            cout << word2 << endl;
+            cout << returnVal << endl;
+            if(!returnVal) {
+                cout << "empty, gracefully close." << endl;
+                close(socket);
                 return;
             }
-        
+
             int x = 0;
             while(x < returnIdentifier(word2)) {
                 wordToCheck += word2[x];
@@ -313,7 +367,6 @@ void clientServicer(int socket, SpellCheckDependencies *dependencies) {
             logBuffer.clear();
 
             //pthread_mutex_unlock(&log_security);
- 
         }
     
     return;
