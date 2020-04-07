@@ -6,7 +6,7 @@
 #include <signal.h>
 
 //#define DEFAULT_DICTIONARY "/usr/share/dict/words";
-#define DEFAULT_DICTIONARY "dictionary_479k.txt";
+#define DEFAULT_DICTIONARY "/usr/share/dict/words";
 #define DEFAULT_PORT 8888;
 
 pthread_mutex_t connection_security;
