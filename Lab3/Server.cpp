@@ -167,9 +167,9 @@ void spawnThreads(SpellCheckDependencies *dependencies) {
     pthread_cond_init(&connection_used, NULL);
     pthread_cond_init(&connection_free, NULL);
 
-    //pthread_mutex_init(&log_security, NULL);
-    //pthread_cond_init(&log_used, NULL);
-    //pthread_cond_init(&log_free, NULL);
+    pthread_mutex_init(&log_security, NULL);
+    pthread_cond_init(&log_used, NULL);
+    pthread_cond_init(&log_free, NULL);
 
     pthread_t worker_1;
     pthread_t worker_2;
@@ -190,61 +190,42 @@ void spawnThreads(SpellCheckDependencies *dependencies) {
 
 void *worker(void *dependencies) {
     
-    pid_t pid = syscall(__NR_gettid);
     while(true) {
-
-        // if(((SpellCheckDependencies *)dependencies)->connections.size() == 0) {
-        //     cout << "PID = " << pid << endl;
-        //     cout << "Waiting on condition variable. (waiting for connection size to be 0)" << endl;
-        //     pthread_cond_wait(&connection_used, &connection_security);
-        // }
-        // else {
-        //     cout << "Signaling condition variable. (Telling other threads they can start)" << endl;
-        //     //pthread_cond_signal(&connection_used);
-        // }
-
-        //NOTE: Everything works if we just do mutex lock and unlock around the connections snatch
-        cout << "PID = " << pid << endl;
-        cout << "Connections Size in Worker = " << ((SpellCheckDependencies *)dependencies)->connections.size() << endl;
 
         pthread_mutex_lock(&connection_security);
 
         //If there are no connections waiting, unlock the thread and put it to sleep.
-        //if(((SpellCheckDependencies *)dependencies)->connections.size() == 0) {
+        if(((SpellCheckDependencies *)dependencies)->connections.size() == 0) {
             pthread_cond_wait(&connection_free, &connection_security);
             pthread_cond_signal(&connection_used);
-        //}
+        }
 
         while(! (((SpellCheckDependencies *)dependencies)->connections.size() <= 0)) {
             
             int socketD = ((SpellCheckDependencies *)dependencies)->connections.snatch();
             
-
-            if(socketD > 0) {
-                //pthread_cond_signal(&connection_used);
-            }
+            //If I delete either of these prints the server doesnt properly accept client messages and I have no clue why.
             cout << "SocketID in Worker = " << socketD << endl;
+            //cout << socketD << endl;
+
             clientServicer(socketD, ((SpellCheckDependencies *)dependencies));
-            //close socket
-            
+
         }
 
         pthread_mutex_unlock(&connection_security);
-        
-        cout << "should be here" << endl;
 
-        
     }
 
-    
     return NULL;
 }
 
 
 void *logger(void *dependencies) {
-    //pthread_mutex_lock(&log_security);
     
+    //Declaring a buffer for whats going to be placed in the log.
     string buff;
+
+    //Declaring output file stream.
     ofstream io;
 
     //Clears file
@@ -256,6 +237,14 @@ void *logger(void *dependencies) {
 
     //Writes to log.
     while(true) {
+        
+        pthread_mutex_lock(&log_security);
+
+        if(((SpellCheckDependencies *)dependencies)->log.size() == 0) {
+            pthread_cond_wait(&log_used, &log_security);
+            pthread_cond_signal(&log_free);
+        }
+
         //I genuinly wrote out these conditions then realized that this is way to stupidly funny to delete. size > 0...
         while(! (((SpellCheckDependencies *)dependencies)->log.size() <= 0)) {
             io.open("log.txt", ios::app);
@@ -270,27 +259,29 @@ void *logger(void *dependencies) {
 
             io.close();
         }
+
+        pthread_mutex_unlock(&log_security);
         
     }
 
-    //pthread_cond_signal(&log_free);
-    
-    //pthread_mutex_unlock(&log_security);
     return NULL;
 }
 
 
 void clientServicer(int socket, SpellCheckDependencies *dependencies) {
-        cout << "In client servicer" << endl;
 
         pthread_mutex_unlock(&connection_security);
-        //We've successfully arrived here with a socket, so alert the mutex that it can allow more to be accepted.
-        //pthread_cond_signal(&connection_free);
         
+        //Buffer for word sent by user.
         char word2[100];
+
+        //Word that is going to be sent to the spell checker.
         string wordToCheck;
+
+        //Word + Spell Check result.
         string logBuffer;
 
+        //Message sent to clients when they connect.
         char notice[51] = "You may now begin entering words to spell check.\n";
         int writeResult = write(socket, notice, sizeof(notice));
         if(writeResult == -1) {
@@ -300,26 +291,21 @@ void clientServicer(int socket, SpellCheckDependencies *dependencies) {
 
         while(true) {
 
-            //pthread_mutex_lock(&log_security);
-            
-            // int readResult = read(socket, &word2, sizeof(word2));
-            //     if(readResult == -1) {
-            //     cout << "Couldnt read from socket." << endl;
-            //     return;
-            // }
+            //Receives message sent from the client. recv() returns -1 if failed, otherwise the number of bytes received from the client.
+            int returnVal = recv(socket, &word2, sizeof(word2), 0);
+            if(returnVal == -1) {
+                cout << "Failed to receive message from client." << endl;
+                close(socket);
+            }
 
-            
-
-
-            int returnVal = recv(socket, &word2, strlen(word2), 0);
-            cout << word2 << endl;
-            cout << returnVal << endl;
+            //If bytes received = 0 then gracefully close the connection. (0 bytes will be sent if the client disconnects.)
             if(!returnVal) {
-                cout << "empty, gracefully close." << endl;
+                cout << "Graceful disconnection complete." << endl;
                 close(socket);
                 return;
             }
 
+            //Get the word we want to spell check from the buffer. (This removes carriage returns and garbage)
             int x = 0;
             while(x < returnIdentifier(word2)) {
                 wordToCheck += word2[x];
@@ -328,13 +314,11 @@ void clientServicer(int socket, SpellCheckDependencies *dependencies) {
 
             logBuffer = wordToCheck;
             
-            if(logBuffer.size() == 0) {
-                return;
-            }
-            
+            //Spell check
             if(spellCheck(wordToCheck, dependencies->dictionary)) {
                 logBuffer += " OK\n";
                 
+                //Share the results with the client.
                 int writeResult1 = write(socket, logBuffer.c_str(), strlen(logBuffer.c_str()));
                 if(writeResult1 == -1) {
                     cout << "Couldnt write to socket1." << endl;
@@ -342,7 +326,6 @@ void clientServicer(int socket, SpellCheckDependencies *dependencies) {
                 }
             }
             else {
-                //push log buffer to log queue.
                 logBuffer += " MISPELLED\n";
 
                 int writeResult2 = write(socket, logBuffer.c_str(), strlen(logBuffer.c_str()));
@@ -353,25 +336,28 @@ void clientServicer(int socket, SpellCheckDependencies *dependencies) {
 
             }
 
-            /*
-            if(dependencies->log.size() > 0) {
-                //pthread_cond_wait(&log_used, &log_security);
-            }
-            */
-                
-            //push log buffer to log queue
+            //Places the complete spell checking result in the log.
+            pthread_mutex_lock(&log_security);
+            
             dependencies->log.push_back(logBuffer);
-            //}
 
+            if(dependencies->log.size() > 0) {
+                pthread_cond_signal(&log_used);
+                pthread_cond_wait(&log_free, &log_security);
+            }
+
+            pthread_mutex_unlock(&log_security);
+
+            //Empties 
             wordToCheck.clear();
             logBuffer.clear();
 
-            //pthread_mutex_unlock(&log_security);
         }
     
     return;
 }
 
+//Returns the index of a carriage return thats located in the buffer.
 int returnIdentifier(string word) {
 
     unsigned int x = 0;
