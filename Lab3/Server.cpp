@@ -171,6 +171,7 @@ void spawnThreads(SpellCheckDependencies *dependencies) {
     pthread_create(&worker_4, NULL, &worker, (void *)dependencies);
     pthread_create(&logging, NULL, &logger, (void *)dependencies);
 
+
     return;
 }
 
@@ -209,7 +210,7 @@ void *logger(void *dependencies) {
     //Clears file
     io.open("log.txt", ios::trunc);
     if(!io.is_open()) {
-        cout << "Couldn't opent the log." << endl;
+        cout << "Couldn't open the log." << endl;
     }
     io.close();
 
