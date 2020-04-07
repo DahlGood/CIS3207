@@ -18,35 +18,40 @@ int main(int argv, char* argc[]) {
     //     cout << "Couldn't open the log." << endl;
     // }
     // io1.close();
-    
+
+    vector<string> log;    
     
     Args *arguments = (Args *)malloc(sizeof(Args));
+    
     arguments->ip = argc[1];
     arguments->port = atoi(argc[2]);
+    arguments->log = log;
 
     
 
-    spawnThreads(10, arguments);
+    spawnThreads(5, arguments);
 
     return 0;
 }
 
-void spawnThreads(int numThreads, Args *args) {
+void spawnThreads(int numThreads, Args *arguments) {
     
-    pthread_mutex_init(&connection_security, NULL);
-    pthread_cond_init(&connection_state, NULL);
+    //pthread_mutex_init(&connection_security, NULL);
+    //pthread_cond_init(&connection_state, NULL);
 
-    pthread_mutex_init(&random_security, NULL);
+    //pthread_mutex_init(&random_security, NULL);
+
+    pthread_t logging;
+    pthread_create(&logging, NULL, &logger, (void *)arguments);
     
     pthread_t *threads = (pthread_t *)malloc(sizeof(pthread_t) * numThreads);
+
     int x = 0;
     while(x < numThreads) {
-        pthread_create(&threads[x], NULL, makeConnection, (void *)args);
+        pthread_create(&threads[x], NULL, &makeConnection, (void *)arguments);
         pthread_join(threads[x], NULL);
         x++;
     }
-    
-    
    
 //    pthread_t worker1;
 //    pthread_create(&worker1, NULL, makeConnection, (void *)args);
@@ -55,7 +60,12 @@ void spawnThreads(int numThreads, Args *args) {
 }
 
 void *makeConnection(void *args) {
-    pthread_mutex_lock(&connection_security);
+    //g++ myClient.cpp -o myClient -pthread -std=c++11
+
+
+    
+    
+    //pthread_mutex_lock(&connection_security);
     //pthread_cond_wait(&connection_state, &connection_security);
     
     //Socket descriptors operate like file descriptors.
@@ -72,76 +82,129 @@ void *makeConnection(void *args) {
         exit(1);
     }
 
-    struct in_addr addrptr;
-    memset(&addrptr, '\0', sizeof(addrptr));
-    
     //Setup the socket with relevant data.
     client.sin_family = AF_INET; //ipv4
-    client.sin_addr.s_addr = inet_addr(((Args *)args)->ip.c_str()); // IP entered when client starts //inet_aton(ip.c_str(), &addrptr) //INADDR_ANY
-    client.sin_port = htons(((Args *)args)->port); //Server port defaults to 8888 btw.
+    client.sin_addr.s_addr = INADDR_ANY;//inet_addr(((Args *)args)->ip.c_str()); // IP entered when client starts //inet_aton(ip.c_str(), &addrptr) //INADDR_ANY
+    client.sin_port = htons(8888);//htons(((Args *)args)->port); //Server port defaults to 8888 btw.
     
     int connection = connect(socket_descriptor, (sockaddr*)&client, sizeof(client));
     if(connection == -1) {
         cout << "connection failed" << endl;
     }
-
+    
     unordered_set<string> dictionary;
     loadDictionary(&dictionary);
 
     string input;
     char output[100];
 
-    int readResult1 = read(socket_descriptor, output, sizeof(output));
+    int readResult1 = recv(socket_descriptor, output, sizeof(output), 0);
     if(readResult1 == -1) {
         cout << "Couldnt write to server." << endl;
     }
-    //while(true) {
-        
-        //cout << "client>";
-        //getline(cin, input);
+    if(!readResult1) {
+        cout << "NOPE" << endl;
+    }
 
-        string randomWord = randomWordGenerator(dictionary);
+    string randomWord = randomWordGenerator(dictionary);
 
-        int writeResult = write(socket_descriptor, randomWord.c_str(), strlen(randomWord.c_str()));
-        if(writeResult == -1) {
-            cout << "Couldnt write to server." << endl;
-        }
-        write(socket_descriptor, "", strlen(randomWord.c_str()));
-        
-        int readResult2 = read(socket_descriptor, output, sizeof(output));
-        if(readResult2 == -1) {
-            cout << "Couldnt write to server." << endl;
-        }
-        logger(output);
+    cout << "Random Word = " << randomWord.c_str() << endl;
 
-        //Because we're only checking one random word for each thread (as specified) lets just stop here.
-    //}
+    int writeResult = write(socket_descriptor, randomWord.c_str(), strlen(randomWord.c_str()));
+    if(writeResult == -1) {
+        cout << "Couldnt write to server." << endl;
+    }
+    
+    int readResult2 = read(socket_descriptor, output, sizeof(output));
+    if(readResult2 == -1) {
+        cout << "Couldnt write to server." << endl;
+    }
+
+    //Pushing to the log
+    ((Args *)args)->log.push_back(output);
 
     close(socket_descriptor);
 
     //pthread_cond_signal(&connection_state);
-    pthread_mutex_unlock(&connection_security);
+    //pthread_mutex_unlock(&connection_security);
+
+    return NULL;
+}
+
+void *logger(void *args) {
+
+    time_t t; // t passed as argument in function time()
+    struct tm * tt; // decalring variable for localtime()
+    pid_t pid = syscall(__NR_gettid);
+
+    //Declaring output file stream.
+    ofstream io;
+
+    //Clears file
+    cout << "Got to log" << endl;
+    io.open("client-log.txt", ios::trunc);
+    if(!io.is_open()) {
+        cout << "Couldn't open the log." << endl;
+    }
+    io.close();
+
+    //Writes to log.
+    while(true) {
+        
+        // pthread_mutex_lock(&log_security);
+
+        if(((Args *)args)->log.size() == 0) {
+            // pthread_cond_wait(&log_used, &log_security);
+            // pthread_cond_signal(&log_free);
+        }
+
+        //I genuinly wrote out these conditions then realized that this is way to stupidly funny to delete. size > 0...
+        while(! (((Args *)args)->log.size() <= 0)) {
+            io.open("client-log.txt", ios::app);
+            if(!io.is_open()) {
+                cout << "Couldn't opent the log." << endl;
+            }
+
+            
+            time (&t); //passing argument to time()
+            tt = localtime(&t);
+            
+            io << "PID: " << pid << " | Time: " << asctime(tt) << " | " << ((Args *)args)->log.back();
+            ((Args *)args)->log.pop_back();
+
+            io.close();
+        }
+
+        // pthread_mutex_unlock(&log_security);
+        
+    }
 
     return NULL;
 }
 
 string randomWordGenerator(unordered_set<string> dictionary) {
     //Generates a random number between 0 and 60. (the size of our random word dictionary.)
-    srand(time(NULL));
-    
-    int num = (rand() % (60 + 1));
+    srand(syscall(__NR_gettid));
+
+    int num;
+    int x = 0;
+    while(x < 4) {
+        num = (rand() % (60 + 1));
+        x++;
+    }
 
     auto iter = begin(dictionary);
 
     advance(iter, num);
     
-    return *iter;
+    string randomWord = *iter;
+    randomWord += '\n';
+    return randomWord;
 }
 
 void loadDictionary(unordered_set<string> *dictionarySet) {
     string wordBuffer;
     ifstream dictionaryFile;
-
 
     dictionaryFile.open("random_words.txt");
 
@@ -164,38 +227,4 @@ string convertCase(string word) {
 
     return word;
 
-}
-
-
-void logger(string buff) {
-    //pthread_mutex_lock(&log_security);
-    
-    //string buff;
-    
-    ofstream io;
-        
-    io.open("client-log.txt", ios::app);
-    if(!io.is_open()) {
-        cout << "Couldn't opent the log." << endl;
-    }
-
-    time_t t; // t passed as argument in function time()
-    struct tm * tt; // decalring variable for localtime()
-    time (&t); //passing argument to time()
-    tt = localtime(&t);
-    
-    pid_t pid = syscall(__NR_gettid);
-
-    
-    io << "PID: " << pid << " | Time: " << asctime(tt) << " | Word: " << buff;
-
-    io.close();
-        
-        
-    
-
-    //pthread_cond_signal(&log_free);
-    
-    //pthread_mutex_unlock(&log_security);
-    return;
 }
