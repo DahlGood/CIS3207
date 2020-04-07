@@ -1,27 +1,33 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include "circular_buffer.h"
 #include <unordered_set>
 #include <iostream>
 #include <fstream>
 #include <ctype.h>
 #include <queue>
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 
 using namespace std;
 
 //Server
-
-typedef struct SpellCheckDependincies {
-    queue<int> connections;
-    queue<string> log;
+typedef struct SpellCheckDependencies {
+    CBuffer connections;
+    //deque<string> log;
+    vector<string> log;
     unordered_set<string> dictionary;
-}SpellCheckDependincies;
+}SpellCheckDependencies;
 
 void *worker(void *arg);
 void *logger(void *arg);
-void spawnThreads(SpellCheckDependincies *dependencies);
-void clientServicer(int socket, SpellCheckDependincies *dependencies);
+void spawnThreads(SpellCheckDependencies *dependencies);
+void clientServicer(int socket, SpellCheckDependencies *dependencies);
+int returnIdentifier(string val);
 
 //Spell Checking
 bool spellCheck(string word, unordered_set<string> dictionarySet);

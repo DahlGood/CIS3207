@@ -2,7 +2,6 @@
 
 
 bool spellCheck(string word, unordered_set<string> dictionarySet) {
-
     word = convertCase(word);
 
     if(dictionarySet.find(word) == dictionarySet.end()) {
