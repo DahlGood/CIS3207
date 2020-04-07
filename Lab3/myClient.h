@@ -15,6 +15,10 @@
 #include <fstream>
 #include <signal.h>
 #include <stdio.h>
+#include <time.h>
+#include <chrono>
+#include <ctime>  
+#include <syscall.h>
 
 using namespace std;
 
@@ -28,3 +32,4 @@ void *makeConnection(void *args);
 string randomWordGenerator(unordered_set<string> dictionary);
 void loadDictionary(unordered_set<string> *dictionarySet);
 string convertCase(string word);
+void logger(string buff);

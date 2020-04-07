@@ -1,7 +1,23 @@
 #include "myClient.h"
+#include <chrono>
+#include <ctime>  
+
+pthread_mutex_t connection_security;
+pthread_cond_t connection_state;
+
+pthread_mutex_t random_security;
 
 
 int main(int argv, char* argc[]) {
+
+    // ofstream io1;
+
+    // //Clears file
+    // io1.open("client-log.txt", ios::trunc);
+    // if(!io1.is_open()) {
+    //     cout << "Couldn't open the log." << endl;
+    // }
+    // io1.close();
     
     
     Args *arguments = (Args *)malloc(sizeof(Args));
@@ -17,7 +33,11 @@ int main(int argv, char* argc[]) {
 
 void spawnThreads(int numThreads, Args *args) {
     
-    /*
+    pthread_mutex_init(&connection_security, NULL);
+    pthread_cond_init(&connection_state, NULL);
+
+    pthread_mutex_init(&random_security, NULL);
+    
     pthread_t *threads = (pthread_t *)malloc(sizeof(pthread_t) * numThreads);
     int x = 0;
     while(x < numThreads) {
@@ -25,16 +45,18 @@ void spawnThreads(int numThreads, Args *args) {
         pthread_join(threads[x], NULL);
         x++;
     }
-    */
+    
     
    
-   pthread_t worker1;
-   pthread_create(&worker1, NULL, makeConnection, (void *)args);
-   pthread_join(worker1, NULL);
+//    pthread_t worker1;
+//    pthread_create(&worker1, NULL, makeConnection, (void *)args);
+//    pthread_join(worker1, NULL);
 
 }
 
 void *makeConnection(void *args) {
+    pthread_mutex_lock(&connection_security);
+    //pthread_cond_wait(&connection_state, &connection_security);
     
     //Socket descriptors operate like file descriptors.
     int socket_descriptor;
@@ -80,22 +102,25 @@ void *makeConnection(void *args) {
 
         string randomWord = randomWordGenerator(dictionary);
 
-        int writeResult = write(socket_descriptor, randomWord.c_str(), sizeof(randomWord.c_str()));
+        int writeResult = write(socket_descriptor, randomWord.c_str(), strlen(randomWord.c_str()));
         if(writeResult == -1) {
             cout << "Couldnt write to server." << endl;
         }
-        write(socket_descriptor, "", sizeof(randomWord.c_str()));
+        write(socket_descriptor, "", strlen(randomWord.c_str()));
         
         int readResult2 = read(socket_descriptor, output, sizeof(output));
         if(readResult2 == -1) {
             cout << "Couldnt write to server." << endl;
         }
-        cout << output << endl;
+        logger(output);
 
         //Because we're only checking one random word for each thread (as specified) lets just stop here.
     //}
 
     close(socket_descriptor);
+
+    //pthread_cond_signal(&connection_state);
+    pthread_mutex_unlock(&connection_security);
 
     return NULL;
 }
@@ -139,4 +164,38 @@ string convertCase(string word) {
 
     return word;
 
+}
+
+
+void logger(string buff) {
+    //pthread_mutex_lock(&log_security);
+    
+    //string buff;
+    
+    ofstream io;
+        
+    io.open("client-log.txt", ios::app);
+    if(!io.is_open()) {
+        cout << "Couldn't opent the log." << endl;
+    }
+
+    time_t t; // t passed as argument in function time()
+    struct tm * tt; // decalring variable for localtime()
+    time (&t); //passing argument to time()
+    tt = localtime(&t);
+    
+    pid_t pid = syscall(__NR_gettid);
+
+    
+    io << "PID: " << pid << " | Time: " << asctime(tt) << " | Word: " << buff;
+
+    io.close();
+        
+        
+    
+
+    //pthread_cond_signal(&log_free);
+    
+    //pthread_mutex_unlock(&log_security);
+    return;
 }
