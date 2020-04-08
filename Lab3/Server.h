@@ -19,7 +19,6 @@ using namespace std;
 //Server
 typedef struct SpellCheckDependencies {
     CBuffer connections;
-    //deque<string> log;
     vector<string> log;
     unordered_set<string> dictionary;
 }SpellCheckDependencies;
