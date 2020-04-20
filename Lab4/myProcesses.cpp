@@ -73,38 +73,36 @@ int main() {
             if(i < 2) {
                 //Creates 2 signal one handlers
                 cout << "Creating sigOne Handlers " << processType[i] << endl;
-                block_signal(2);
-                signal(SIGUSR1, signalHandler);
-                signal(SIGINT, signalHandler);
+                signalUpdater(1);
+                //generator();
                 //pause();
             }
             else if(i >= 2 && i < 4) {
-                
                 cout << "Creating sigTwo Handlers " << processType[i] << endl;
                 //Creates 2 signal two handlers
-                block_signal(1);
-                signal(SIGUSR2, signalHandler);
-                signal(SIGINT, signalHandler);
+                signalUpdater(2);
                 //pause();
             }
             else if(i == 4) {
                 
                 //Creates 1 reporting process
                 cout << "Creating reporter" << endl;
-                signal(SIGINT, reporter);
+                reporter(1);
                 //pause();
             }
             else if(i > 4 && i < 8) {
                 
                 //Creates 3 signal generators
                 cout << "Creating sigGen" << endl;
-                signal(SIGINT, signalGenerator);
+                generator();
+                //signalUpdater(1);
                 //pause();
             }
         }
         else {
-            waitpid(processType[i], NULL, 0);
-            cout << "Reached end of process creation." << endl;
+            //THIS IS WORKING WITH WAITPID HERE
+            //waitpid(processType[i], NULL, 0);
+            //cout << "Reached end of process creation." << endl;
             
             //if we've completed every iteration AND we're in the original parent then continue.
             if(i == SUB_PROCESSES) { 
@@ -128,7 +126,7 @@ int main() {
                 else {
                     sleep(TIME_TO_RUN);
                     cout << "MAIN FUNCTION PID " << getpid() << endl;
-                    for(int y = SUB_PROCESSES-1; y > 0; y--) {
+                    for(int y = 0; y < SUB_PROCESSES; y++) {
                         //If max count reached kill all child processes.
                         cout << "Attempting to kill process " << y << " " << processType[y] <<  endl;
                         kill(processType[y], SIGINT);
@@ -139,17 +137,8 @@ int main() {
                     exit(0);
                     
                 }  
-
-                //waitpid(processType[i], NULL, 0);
-                
-                    
-                
-                //waitpid(processType[i], NULL, 0);
-                //waitpid(-1, NULL, 0);
-                //wait(NULL);
+                wait(NULL);
             }
-            //waitpid(-1, NULL, 0);
-            //wait(NULL);
             //waitpid(processType[i], NULL, 0);
         }
     }
@@ -160,32 +149,141 @@ int main() {
     return 0;
 }
 
-void signalGenerator(int signal) {
+void signalHandler(int signal) {
 
-    cout << "Arrived " << getpid() << " in signalGenerator." << endl;
+    if(signal == SIGINT) {
+        cout << "Killing " << getpid() << " in signalHandler" << endl;
+        //shmdt(count);
+        exit(0);
+    }
+    if(signal == SIGUSR1) {
+        cout << "\t\t\tIncrementing SIGUSER1 in signalHandler" << endl;
+    }
+    else if(signal == SIGUSR2) {
+        cout << "\t\t\tIncrementing SIGUSER2 in signalHandler" << endl;
+    }
     
-    srand(time(NULL));
+}
+
+void signalUpdater(int value) {
+    
+    if(value == 1) {
+        block_signal(2);
+        signal(SIGUSR1, signalHandler);
+        signal(SIGINT, signalHandler);
+
+    }
+    if(value == 2) {
+        block_signal(1);
+        signal(SIGUSR2, signalHandler);
+        signal(SIGINT, signalHandler);
+
+    }
 
     while(true) {
 
-        if(signal == SIGINT) {
-            cout << "Killing " << getpid() << " in signalGenerator" << endl;
-            //shmdt(count);
-            exit(0);
+        cout << "\t\tSignal Updater paused" <<  endl;
+        pause();
+        cout << "\t\tSignal Updater unpaused" <<  endl;
+
+        if(value == 1) {
+            //pthread_mutex_lock(&count->mutexOne);
+            cout << "\t\t\tIncrementing SIGUSER1 in signalUpdater" << endl;
+            //count->receivedSIGUSR1++;
+            //pthread_mutex_unlock(&count->mutexOne);
         }
+        if(value == 2) {
+            //pthread_mutex_lock(&count->mutexTwo);
+            cout << "\t\t\tIncrementing SIGUSER2 in signalUpdater" << endl;
+            //count->receivedSIGUSR2++;
+            //pthread_mutex_unlock(&count->mutexTwo);
+        }
+
+    }
+
+    return;
+}
+
+void reporterHandler(int sig) {
+
+    cout << "Arrived " << getpid() << " in reporterHandler" << endl;
+    if(sig == SIGINT) {
+        cout << "Killing " << getpid() << " in reporterHandler" << endl;
+        //free shared memory
+        //cout << "In report handler, pid+1 = " << getpid()+1 << endl;
+        //kill(getpid()+1, SIGINT);
+        exit(0);
+    }
+
+    if(sig == SIGUSR1) {
+        //Handle reporting.
+        cout << "\t\t\tHandling SIGUSER1 in reporterHandler" << endl;
+    }
+    else if(sig == SIGUSR2) {
+        //Handle reporting.
+        cout << "\t\t\tHandling SIGUSER2 in reporterHandler" << endl;
+    }
+    
+
+}
+
+void reporter(int value) {
+
+    signal(SIGINT, reporterHandler);
+    signal(SIGUSR1, reporterHandler);
+    signal(SIGUSR2, reporterHandler);
+
+    while(true) {
+
+        cout << "\t\tReporting process paused" << endl;
+        pause();
+
+        cout << "\t\tReporting process unpaused - this is where the reporting would take place." << endl;
+
+        /*
+
+            Handle reporting. Only keeping track of last x elements so maybe use the circular buffer from the last assignment :)
+
+        */
+
+    }
+
+}
+
+void generatorHandler(int signal) {
+
+    cout << "Arrived " << getpid() << " in generatorHandler." << endl;
+    
+    if(signal == SIGINT) {
+        cout << "Killing " << getpid() << " in generatorHandler" << endl;
+        //shmdt(count);
+        exit(0);
+    }
+
+    
+}
+
+void generator() {
+
+    cout << "Arrived " << getpid() << " in generator." << endl;
+
+    signal(SIGINT, generatorHandler);
+
+    srand(time(NULL));
+    while(true) {
 
         //Do stuff
         double randNum = randGenerator(0, 1);
         if(randNum < 0.5) {
             //Signal SIGUSR1
-            cout << "Sending signal to SIGUSR1" << endl;
-            kill(getpid(), SIGUSR1);
+            cout << "\t\t\tSending signal to SIGUSR1 from generator" << endl;
+            kill(1, SIGUSR1);
             //sentSIGUSR1++ INSURE MUTEX
         }
         else if(randNum >= 0.5){
             //Signal SIGUSR2
-            cout << "Sending signal to SIGUSR2" << endl;
-            kill(getpid(), SIGUSR2);
+            cout << "\t\t\tSending signal to SIGUSR2 from generator" << endl;
+            kill(1, SIGUSR2);
             //sentSIGUSR2++ INSURE MUTEX
         }
         
@@ -195,64 +293,8 @@ void signalGenerator(int signal) {
     }
 }
 
-void signalHandler(int signal) {
-
-    cout << "Arrived " << getpid() << " in signalHandler" << endl;
-    
-    while(true) {
-
-        if(signal == SIGINT) {
-            cout << "Killing " << getpid() << " in signalHandler" << endl;
-            //shmdt(count);
-            exit(0);
-        }
-
-        if(signal == SIGUSR1) {
-            //mutex
-            //pthread_mutex_lock(&count->mutexOne);
-            cout << "Incrementing SIGUSER1" << endl;
-            //count->receivedSIGUSR1++;
-            //pthread_mutex_unlock(&count->mutexOne);
-        }
-        else if(signal == SIGUSR2) {
-            //mutex
-            //pthread_mutex_lock(&count->mutexTwo);
-            cout << "Incrementing SIGUSER2" << endl;
-            //count->receivedSIGUSR2++;
-            //pthread_mutex_unlock(&count->mutexTwo);
-        }
-
-    }
-    
-}
-
-void reporter(int sig) {
-
-    cout << "Arrived " << getpid() << " in reporter" << endl;
-
-    while(true) {
-
-        if(sig == SIGINT) {
-            cout << "Killing " << getpid() << " in reporter" << endl;
-            //shmdt(count);
-            exit(0);
-        }
-
-        if(sig == SIGUSR1) {
-            //Handle reporting.
-            cout << "Handling SIGUSER1 in reporter" << endl;
-        }
-        else if(sig == SIGUSR2) {
-            //Handle reporting.
-            cout << "Handling SIGUSER2 in reporter" << endl;
-        }
-
-    }
-
-}
-
 double randGenerator(double lowerBound, double upperBound) {
-    cout << "Arrived in randGenerator" << endl;
+    //cout << "Arrived in randGenerator" << endl;
     return (fmod(rand(), upperBound) + lowerBound);
 }
 

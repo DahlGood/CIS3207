@@ -24,10 +24,12 @@ typedef struct Counters {
 
 using namespace std;
 
-void signalGenerator(int signal);
 void signalHandler(int signal);
-//void signalTwoHandler(Counters *count, int signal);
-void reporter(int signal);
-void block_signal(int x);
+void signalUpdater(int value);
+void reporterHandler(int sig);
+void reporter(int value);
+void generatorHandler(int signal);
+void generator();
 double randGenerator(double lowerBound, double upperBound);
+void block_signal(int x);
 bool maxCountReached();
