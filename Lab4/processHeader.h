@@ -31,5 +31,6 @@ void reporter(int value);
 void generatorHandler(int signal);
 void generator();
 double randGenerator(double lowerBound, double upperBound);
-void block_signal(int x);
+void unblock_signal(int signal);
+void block_signal(int signal);
 bool maxCountReached();
