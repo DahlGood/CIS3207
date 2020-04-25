@@ -1,7 +1,7 @@
 #include "processHeader.h"
 
 
-#define TIME_TO_RUN 5
+#define TIME_TO_RUN -1
 #define MAX_SIGNAL_COUNT 100000
 #define SUB_PROCESSES 8
 
@@ -11,20 +11,20 @@ int main() {
 
     block_signal(SIGUSR1);
     block_signal(SIGUSR2);
-    block_signal(SIGINT);
+    //block_signal(SIGINT);
     
     //Set-up mutexes
-    // pthread_mutex_t mutexOne;
-    // pthread_mutexattr_t attrOne;
-    // pthread_mutexattr_init(&attrOne);
-    // pthread_mutexattr_setpshared(&attrOne, PTHREAD_PROCESS_SHARED);
-    // pthread_mutex_init(&mutexOne, &attrOne);
+    pthread_mutex_t mutexOne;
+    pthread_mutexattr_t attrOne;
+    pthread_mutexattr_init(&attrOne);
+    pthread_mutexattr_setpshared(&attrOne, PTHREAD_PROCESS_SHARED);
+    pthread_mutex_init(&mutexOne, &attrOne);
 
-    // pthread_mutex_t mutexTwo;
-    // pthread_mutexattr_t attrTwo;
-    // pthread_mutexattr_init(&attrTwo);
-    // pthread_mutexattr_setpshared(&attrTwo, PTHREAD_PROCESS_SHARED);
-    // pthread_mutex_init(&mutexOne, &attrTwo);
+    pthread_mutex_t mutexTwo;
+    pthread_mutexattr_t attrTwo;
+    pthread_mutexattr_init(&attrTwo);
+    pthread_mutexattr_setpshared(&attrTwo, PTHREAD_PROCESS_SHARED);
+    pthread_mutex_init(&mutexOne, &attrTwo);
 
 
     //Controlling execution duration of the program
@@ -93,6 +93,7 @@ int main() {
                 if(TIME_TO_RUN == -1) {
                     while(true) {
                         if(maxCountReached()) {
+                            /*
                             for(int i = 0; i < SUB_PROCESSES; i++) {
                                 
                                 //If max count reached, kill all child processes.
@@ -101,9 +102,18 @@ int main() {
                                 waitpid(processType[i], NULL, 0);
                                 
                             }
-                            
+                            */
+
+                           for(int y = 0; y < SUB_PROCESSES; y++) {
+                                //If max count reached kill all child processes.
+                                cout << "Attempting to kill process " << y << " " << processType[y] <<  endl;
+                                kill(processType[y], SIGINT);
+                            }
                             //Making sure all proceess close before main closes. Purely to make the console look nicer.
                             sleep(2);
+                            
+                            cout << count->sentSIGUSR1 << " " << count->receivedSIGUSR1 << endl;
+                            cout << count->sentSIGUSR2 << " " << count->receivedSIGUSR2 << endl;
 
                             //Free shared memory in parent and exit.
                             int detatchedVal = shmdt(count);
@@ -207,16 +217,16 @@ void signalUpdater(int value) {
         if(value == 1) {
             //cout << "in signal handler 1" << endl;
             cout << "Received SIGUSR1" << endl;
-            //pthread_mutex_lock(&count->mutexOne);
+            pthread_mutex_lock(&count->mutexOne);
             count->receivedSIGUSR1++;
-            //pthread_mutex_unlock(&count->mutexOne);
+            pthread_mutex_unlock(&count->mutexOne);
         }
         if(value == 2) {
             //cout << "in signal handler 2" << endl;
             cout << "Received SIGUSR2" << endl;
-            //pthread_mutex_lock(&count->mutexTwo);
+            pthread_mutex_lock(&count->mutexTwo);
             count->receivedSIGUSR2++;
-            //pthread_mutex_unlock(&count->mutexTwo);
+            pthread_mutex_unlock(&count->mutexTwo);
         }
 
     }
@@ -319,18 +329,18 @@ void generator() {
             //Signal SIGUSR1
             //cout << "Sending SIGUSR1" << endl;
             cout << "Sent SIGUSR1" << endl;
-            //pthread_mutex_lock(&count->mutexOne);
+            pthread_mutex_lock(&count->mutexOne);
             count->sentSIGUSR1++;
-            //pthread_mutex_unlock(&count->mutexOne);
+            pthread_mutex_unlock(&count->mutexOne);
             kill(0, SIGUSR1);
         }
         else if(randNum >= 0.5){
             //Signal SIGUSR2
             //cout << "Sending SIGUSR2" << endl;
             cout << "Sent SIGUSR2" << endl;
-            //pthread_mutex_lock(&count->mutexTwo);
+            pthread_mutex_lock(&count->mutexTwo);
             count->sentSIGUSR2++;
-            //pthread_mutex_unlock(&count->mutexTwo);
+            pthread_mutex_unlock(&count->mutexTwo);
             kill(0, SIGUSR2);
 
         }
