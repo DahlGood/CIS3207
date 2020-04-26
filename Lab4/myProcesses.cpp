@@ -219,15 +219,10 @@ void signalUpdater(int value) {
 
 void reporterHandler(int sig) {
 
-    ofstream log;
     
-    auto timenow = chrono::system_clock::to_time_t(chrono::system_clock::now());
-
-    log.open("logP.txt", ios::app);
-    if(!log.is_open()) {
-        cout << "Couldnt open file correctly" << endl;
-    }
-
+    //pthread_mutex_unlock(&count->mutexThree);
+    //yuyuyyupthread_mutex_unlock(&count->mutexOne);
+    
     cout << "ReporterHandler " << getppid() << " -> " << getpid() << endl;
     if(sig == SIGINT) {
         cout << "Killing " << getppid() << " -> " << getpid() << " in reporterHandler" << endl;
@@ -238,41 +233,6 @@ void reporterHandler(int sig) {
         }
         exit(0);
     }
-
-    //wewewewewewpthread_mutex_lock(&count->mutexOne);
-    pthread_mutex_lock(&count->mutexThree);
-    concurrentProcesses++;
-    if(concurrentProcesses == 10) {
-        
-        concurrentProcesses = 0;
-        time_t sumSIGUSR1;
-        time_t sumSIGUSR2;
-        for(auto x : pastSIGUSR1) {
-            sumSIGUSR1 += x;
-        }
-        for(auto x : pastSIGUSR2) {
-            sumSIGUSR2 += x;
-        }
-
-        time_t avgTime1 = sumSIGUSR1/pastSIGUSR1.size();
-        time_t avgTime2 = sumSIGUSR2/pastSIGUSR2.size();
-        //ctime(&timenow);
-        
-        log << "SIGUSR1 | " << " | Sent " << count->sentSIGUSR1 << " Received " << count->receivedSIGUSR1 << " | " << "Current Time " << ctime(&timenow) << " | Avg Between Signals " << ctime(&avgTime1) << endl;
-        log << "SIGUSR2 | " << " | Sent " << count->sentSIGUSR2 << " Received " << count->receivedSIGUSR2 << " | " << "Current Time " << ctime(&timenow) << " | Avg Between Signals " << ctime(&avgTime2) << endl;
-        
-
-        sumSIGUSR1 = 0;
-        sumSIGUSR2 = 0;
-        avgTime1 = 0;
-        avgTime2 = 0;
-        pastSIGUSR1.clear();
-        pastSIGUSR2.clear();
-        
-    }
-    pthread_mutex_unlock(&count->mutexThree);
-    //yuyuyyupthread_mutex_unlock(&count->mutexOne);
-    
 
     //pthread_mutex_lock(&count->mutexTwo);
     if(sig == SIGUSR1) {
@@ -302,6 +262,53 @@ void reporter(int value) {
     while(true) {
         
         pause();
+
+        ofstream log;
+    
+        auto timenow = chrono::system_clock::to_time_t(chrono::system_clock::now());
+
+        log.open("logP.txt", ios::app);
+        if(!log.is_open()) {
+            cout << "Couldnt open file correctly" << endl;
+        }
+
+        //wewewewewewpthread_mutex_lock(&count->mutexOne);
+        //pthread_mutex_lock(&count->mutexThree);
+        concurrentProcesses++;
+        if(concurrentProcesses == 10) {
+            pthread_mutex_lock(&count->mutexOne);
+            pthread_mutex_lock(&count->mutexTwo);
+            concurrentProcesses = 0;
+
+            time_t sumSIGUSR1;
+            time_t sumSIGUSR2;
+            for(auto x : pastSIGUSR1) {
+                sumSIGUSR1 += x;
+            }
+            for(auto x : pastSIGUSR2) {
+                sumSIGUSR2 += x;
+            }
+
+            time_t avgTime1 = sumSIGUSR1/pastSIGUSR1.size();
+            time_t avgTime2 = sumSIGUSR2/pastSIGUSR2.size();
+            //ctime(&timenow);
+            
+            
+            log << "SIGUSR1 | " << " | Sent " << count->sentSIGUSR1 << " Received " << count->receivedSIGUSR1 << " | " << "Current Time " << ctime(&timenow) << " | Avg Between Signals " << ctime(&avgTime1) << endl;
+            log << "SIGUSR2 | " << " | Sent " << count->sentSIGUSR2 << " Received " << count->receivedSIGUSR2 << " | " << "Current Time " << ctime(&timenow) << " | Avg Between Signals " << ctime(&avgTime2) << endl;
+            
+
+            sumSIGUSR1 = 0;
+            sumSIGUSR2 = 0;
+            avgTime1 = 0;
+            avgTime2 = 0;
+            pastSIGUSR1.clear();
+            pastSIGUSR2.clear();
+
+            pthread_mutex_unlock(&count->mutexOne);
+            pthread_mutex_unlock(&count->mutexTwo);
+
+        }
 
         // pthread_mutex_lock(&count->mutexOne);
         
@@ -363,10 +370,12 @@ void generator() {
         //Fix these times
         struct timespec whats_a_long;
         whats_a_long.tv_sec = 0;
-        whats_a_long.tv_nsec = randGenerator(0.01, 0.1) * 1000000000.0;
+        //whats_a_long.tv_nsec = randGenerator(0.01, 0.1) * 1000000000L;
+        whats_a_long.tv_nsec = 0.01 * 1000000000L;
+        //whats_a_long.tv_nsec = 1;
         nanosleep(&whats_a_long, NULL);
     }
-    pause();
+    //pause();
 }
 
 double randGenerator(double lowerBound, double upperBound) {

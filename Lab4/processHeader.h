@@ -12,6 +12,13 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
+#include <fstream>
+
+#include <chrono> 
+#include <ctime> 
+
+#include <vector>
+
 
 typedef struct Counters {
     int sentSIGUSR1 = 0;
@@ -20,6 +27,7 @@ typedef struct Counters {
     int receivedSIGUSR2 = 0;
     pthread_mutex_t mutexOne;
     pthread_mutex_t mutexTwo;
+    pthread_mutex_t mutexThree;
 }Counters;
 
 using namespace std;
