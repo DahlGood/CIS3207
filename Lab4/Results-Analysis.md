@@ -17,7 +17,7 @@ Multiprocesses
     <summary>
         Program running for 30 seconds.
     </summary>
-    <a href="/Results/Process30sec.txt" target="_blank">Log_30sec.txt</a>
+    <a href="Lab4/Results/Process30sec.txt" target="_blank">Log_30sec.txt</a>
     
 </details>
 
