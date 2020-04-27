@@ -3,7 +3,7 @@
 
 ### Introduction
 
-This lab required us to use signals for inter-process and inter-thread communication. These two types of communication were implemented in two different programs both with the goal of completing the same task. Both programs create a thread or processes respectively. Each thread has a main function, a reporting function, three signal counting functions, and three signal generating functions.
+This lab required us to use signals for interprocess and interthread communication. These two types of communication were implemented in two different programs both with the goal of completing the same task. Both programs create a thread or processes respectively. Each thread has a main function, a reporting function, three signal counting functions, and three signal generating functions.
 
 * main - creates the threads / processes and determines when the program should stop.
 * reporter - receives signals and writes useful information / stats to a log file.
