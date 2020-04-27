@@ -1,7 +1,7 @@
 #include "threadHeader.h"
 
 
-#define TIME_TO_RUN 30
+#define TIME_TO_RUN -1
 #define MAX_SIGNAL_COUNT 100000
 #define SUB_PROCESSES 8
 
@@ -248,7 +248,7 @@ void *reporter(void* args) {
 
     ofstream log;
     
-    auto timenow = chrono::system_clock::to_time_t(chrono::system_clock::now());
+    
 
     log.open("logT.txt", ios::app);
     if(!log.is_open()) {
@@ -259,6 +259,8 @@ void *reporter(void* args) {
 
     
     while(true) {
+
+        auto timenow = chrono::system_clock::to_time_t(chrono::system_clock::now());
         
         cout << "Waiting... reporter" << endl;
         sigwait(&sigset, &sig);

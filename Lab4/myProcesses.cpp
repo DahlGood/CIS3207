@@ -1,7 +1,7 @@
 #include "processHeader.h"
 
 
-#define TIME_TO_RUN 30
+#define TIME_TO_RUN -1
 #define MAX_SIGNAL_COUNT 100000
 #define SUB_PROCESSES 8
 
