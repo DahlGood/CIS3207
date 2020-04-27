@@ -4,6 +4,8 @@
 
 ### Program Desciption
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc velit erat, semper ut dui eu, consequat tincidunt tellus. Mauris commodo lacinia finibus. Donec egestas quam et mi fermentum, imperdiet ornare odio semper. Phasellus tincidunt consequat congue. Pellentesque nec est lorem. Suspendisse mattis metus lectus, non pretium tortor consectetur vel. Nunc non elementum neque.
+This lab demonstrates the use of signals for inter-process and inter-thread communication. These two types of communication are implemented in two different programs both with the goal of completing the same task. Both programs create a thread or processes respectively. Each thread has a main function, a reporting function, three signal counting functions, and three signal generating functions.
 
-Vivamus quis dolor sollicitudin, sagittis nibh et, ultricies felis. Nullam vel egestas neque. Cras vitae nibh mi. Nunc gravida ligula sem, sed ultricies metus lacinia quis. Aenean bibendum lobortis lectus, malesuada fringilla massa lacinia mollis. Proin fringilla lorem nunc, quis bibendum mi tempus sit amet. Nulla dapibus mi dolor, eget facilisis nulla blandit ut. Quisque quis sem tincidunt, gravida odio vel, ornare erat. Etiam sodales scelerisque ante eget ullamcorper. Ut sit amet erat ac tellus bibendum commodo a vitae nisl.
+#### Results, Analysis, and Testing
+
+Click [here](Results-Analysis.md) to view results, analysis and testing for this project.
