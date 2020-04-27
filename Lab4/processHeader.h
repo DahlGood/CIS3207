@@ -27,7 +27,6 @@ typedef struct Counters {
     int receivedSIGUSR2 = 0;
     pthread_mutex_t mutexOne;
     pthread_mutex_t mutexTwo;
-    pthread_mutex_t mutexThree;
 }Counters;
 
 using namespace std;
