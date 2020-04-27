@@ -15,8 +15,8 @@ Simulated CPU, Disks, and Network.
 #### Simple Shell implementation that handles bash commands
 Handles bash commands <, >, >>, |, & on various built-in funtions and all external programs present on the system.
 
-## [Lab3 - Network Spell Checker](Lab3/)
-### Spell Checker.
+## [Lab3 - Spell Checker](Lab3/)
+### Network Spell Checker
 #### Multi-Threaded Network Spell Checker.
 
 The project is broken into two parts. The server and the client. The server accepts connections and the client connects. Once a connection is made the client can send the server a word. The server spell checks that word and tells the client whether it was correctly spelled or not. These are two seperate applications and do not depend on each other at all, however the client was developed with our server in mind.
